@@ -17,9 +17,8 @@ const style = {
 const LEFT = 37; /* left arrow */
 const ROTATE_UP = 90; /* z */
 const RIGHT = 39; /* right arrow */
-const DOWN = 40; /* down arrow */
 const ROTATE_DOWN = 88; /* x */
-const STOP = 32; /* space */
+const DOWN = 32; /* space */
 
 const increaseSpeed = ({ speed }) => speed - 10 * (speed > 10);
 
@@ -27,6 +26,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = s.InitialState();
+    this.futurePosition();
     this.mutex = new Mutex();
   }
 
@@ -35,12 +35,10 @@ class App extends Component {
   componentDidMount() {
     this.periodicInterval = setInterval(() => {
       this.mutex.lock();
-      if (!this.state.isPause) {
-        this.updateBoard({ shapePos: s.DEFAULT_VALUE });
-        this.shiftDown();
-        this.updateBoard(this.state);
-        this.setState({ score: this.state.score + 1 });
-      }
+      this.updateBoard({ shapePos: s.DEFAULT_VALUE });
+      this.shiftDown();
+      this.updateBoard(this.state);
+      this.setState({ score: this.state.score + 1 });
     }, this.state.speed);
     document.onkeydown = this.keyInput;
   }
@@ -85,6 +83,8 @@ class App extends Component {
     // Shifting if there is not conflict
     if (!isConflict) {
       this.setState({ xPos: this.state.xPos + deltaX });
+      this.setState({ futureXPos: this.state.futureXPos + deltaX });
+      this.futurePosition();
     }
   };
 
@@ -104,12 +104,12 @@ class App extends Component {
           // remove values that don't conflict with other shape
           this.state.board[elem] !== s.DEFAULT_VALUE
       );
-      console.log(
+      /*console.log(
         newArray,
         conflictedArray,
         isConflict,
         newState.xPos + newShape.length > ROW_SIZE
-      );
+      );*/
 
       // checking for conflict and making sure it is not going off edge
       if (
@@ -121,6 +121,7 @@ class App extends Component {
     });
     if (!isConflict) {
       this.setState({ rotatePos: newState.rotatePos });
+      this.futurePosition();
     }
   };
 
@@ -160,8 +161,12 @@ class App extends Component {
       speed: increaseSpeed(this.state),
       yPos: -3,
       xPos: ROW_SIZE / 2,
+      futureXPos: -1,
+      futureYPos: -1,
       rotatePos: 0,
     });
+
+    this.futurePosition();
   };
 
   shiftDown = () => {
@@ -198,6 +203,36 @@ class App extends Component {
     this.setState({ yPos: this.state.yPos + 1 });
   };
 
+  futurePosition = () => {
+    let copy = { ...this.state };
+    //console.log(copy);
+    while (true) {
+      //console.log("Loop");
+      let curShape = s.getShape(copy);
+      if (copy.yPos + curShape.length >= COL_SIZE) {
+        this.setState({ futureYPos: copy.yPos });
+        return;
+      }
+      curShape[0].forEach((_, pos) => {
+        let newArray = curShape.map((row) =>
+          row[pos] === s.DEFAULT_VALUE ? -1 : row[pos] + ROW_SIZE
+        );
+        let bottomValue = Math.max.apply(Math, newArray);
+        if (
+          // handling the shape before it touches the board
+          copy.board[bottomValue] !== undefined &&
+          // checking if there is no collision
+          copy.board[bottomValue] !== s.DEFAULT_VALUE
+        ) {
+          this.setState({ futureYPos: copy.yPos });
+          return;
+        }
+      });
+
+      copy.yPos = copy.yPos + 1;
+    }
+  };
+
   updateBoard = ({ shapePos }) => {
     let board = [...this.state.board];
     let curShape = s.getShape(this.state);
@@ -211,16 +246,8 @@ class App extends Component {
     this.setState({ board: board });
   };
 
-  pauseGame = () => this.setState({ isPause: !this.state.isPause });
-
   keyInput = ({ keyCode }) => {
     this.mutex.lock();
-    if (this.state.isPause) {
-      if (keyCode === STOP) {
-        this.pauseGame();
-      }
-      return;
-    }
 
     // clearing the board
     this.updateBoard({ shapePos: s.DEFAULT_VALUE });
@@ -238,9 +265,6 @@ class App extends Component {
         // this.detectCollision();
         this.shiftDown();
         break;
-      case STOP:
-        this.pauseGame();
-        break;
     }
     this.updateBoard(this.state);
   };
@@ -252,7 +276,7 @@ class App extends Component {
     return (
       <div className="App">
         <h1> Tetris {this.state.score}</h1>
-        <p> Right|Left|Down|Z|X|Space </p>
+        <p> Right|Left|Z|X|Space </p>
         <div style={style}> {board} </div>
       </div>
     );

@@ -1,5 +1,5 @@
 export const ROW_SIZE = 8;
-export const COL_SIZE = 15;
+export const COL_SIZE = 20;
 export const DEFAULT_VALUE = -1;
 
 const SHAPE = [
@@ -148,8 +148,9 @@ export const InitialState = () => {
     xPos: ROW_SIZE / 2, // postion of current shape in x direction
     yPos: -3, // postion of variable in y direction
     board: emptyBoard(),
+    futurexPos: -1,
+    futureyPos: -1,
     speed: 500,
-    isPause: false,
     score: 0,
   };
 };
