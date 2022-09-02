@@ -1,29 +1,30 @@
 import React from "react";
 
+// Mapping color to shape
 const COLOR_MAP = [
-  "white",
-  "pink",
-  "red",
-  "orange",
-  "yellow",
-  "green",
-  "blue",
-  "purple",
+  "black", //None
+  "pink", //I
+  "purple", //T
+  "green", //L
+  "brown", //J
+  "red", //Z
+  "orange", //S
+  "blue", //O
 ];
 
+/* for css */
 const getStyle = (colorVal) => {
   return {
     height: "35px",
     width: "35px",
     borderStyle: "solid",
     borderWidth: "1px",
-    borderColor: "black",
     color: "black",
     justifyContent: "center",
     backgroundColor: COLOR_MAP[colorVal],
   };
 };
 
-export default function Square(props) {
-  return <div style={getStyle(props.colorVal)} />;
-}
+const Square = (props) => <div style={getStyle(props.color + 1)} />;
+
+export default Square;
