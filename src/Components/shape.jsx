@@ -131,6 +131,21 @@ export const getShape = ({ shapePos, rotatePos, xPos, yPos }) =>
     )
   );
 
+// Returns the 2D array that represents the future shape with accurate position
+export const getFutureShape = ({
+  shapePos,
+  rotatePos,
+  futureXPos,
+  futureYPos,
+}) =>
+  SHAPE[shapePos][rotatePos].map((row, rowPos) =>
+    row.map((col, colPos) =>
+      col
+        ? futureXPos + colPos + ROW_SIZE * (rowPos + futureYPos)
+        : DEFAULT_VALUE
+    )
+  );
+
 //  updatest the rotate pos that represents the roatation for given shape
 export const rotateShape = (isClockwise, { shapePos, rotatePos }) =>
   isClockwise
@@ -148,8 +163,8 @@ export const InitialState = () => {
     xPos: ROW_SIZE / 2, // postion of current shape in x direction
     yPos: -3, // postion of variable in y direction
     board: emptyBoard(),
-    futurexPos: -1,
-    futureyPos: -1,
+    futureXPos: ROW_SIZE / 2,
+    futureYPos: -3,
     speed: 500,
     score: 0,
   };

@@ -18,7 +18,8 @@ const LEFT = 37; /* left arrow */
 const ROTATE_UP = 90; /* z */
 const RIGHT = 39; /* right arrow */
 const ROTATE_DOWN = 88; /* x */
-const DOWN = 32; /* space */
+const DOWN = 40; /* down arrow */
+const SPACE = 32; /* space */
 
 const increaseSpeed = ({ speed }) => speed - 10 * (speed > 10);
 
@@ -35,9 +36,12 @@ class App extends Component {
   componentDidMount() {
     this.periodicInterval = setInterval(() => {
       this.mutex.lock();
-      this.updateBoard({ shapePos: s.DEFAULT_VALUE });
+      this.updateBoard({
+        shapePos: s.DEFAULT_VALUE,
+        futurePos: -2,
+      });
       this.shiftDown();
-      this.updateBoard(this.state);
+      this.updateBoard({ shapePos: this.state.shapePos, futurePos: -2 });
       this.setState({ score: this.state.score + 1 });
     }, this.state.speed);
     document.onkeydown = this.keyInput;
@@ -83,7 +87,6 @@ class App extends Component {
     // Shifting if there is not conflict
     if (!isConflict) {
       this.setState({ xPos: this.state.xPos + deltaX });
-      this.setState({ futureXPos: this.state.futureXPos + deltaX });
       this.futurePosition();
     }
   };
@@ -127,7 +130,10 @@ class App extends Component {
 
   getNextBlock = () => {
     let curShape = s.getShape(this.state);
-    this.updateBoard(this.state);
+    this.updateBoard({
+      shapePos: this.state.shapePos,
+      futurePos: -2,
+    });
 
     for (let i = 0; i < curShape.length; i++) {
       // getting the row that the shape is touching
@@ -161,11 +167,10 @@ class App extends Component {
       speed: increaseSpeed(this.state),
       yPos: -3,
       xPos: ROW_SIZE / 2,
-      futureXPos: -1,
-      futureYPos: -1,
+      futureXPos: ROW_SIZE / 2,
+      futureYPos: -3,
       rotatePos: 0,
     });
-
     this.futurePosition();
   };
 
@@ -182,12 +187,14 @@ class App extends Component {
       let newArray = curShape.map((row) =>
         row[pos] === s.DEFAULT_VALUE ? -1 : row[pos] + ROW_SIZE
       );
+
       let bottomValue = Math.max.apply(Math, newArray);
+      //console.log(bottomValue);
       if (
         // handling the shape before it touches the board
         this.state.board[bottomValue] !== undefined &&
         // checking if there is no collision
-        this.state.board[bottomValue] !== s.DEFAULT_VALUE
+        this.state.board[bottomValue] >= 0
       ) {
         if (this.state.yPos <= 0 && this.state.yPos !== -3) {
           this.getNextBlock();
@@ -204,37 +211,60 @@ class App extends Component {
   };
 
   futurePosition = () => {
-    let copy = { ...this.state };
     //console.log(copy);
-    while (true) {
+
+    //Starts from the current block position
+    this.setState({
+      futureXPos: this.state.xPos,
+      futureYPos: this.state.yPos,
+    });
+    let flag = true;
+    let x = 0;
+    while (x < 100) {
       //console.log("Loop");
-      let curShape = s.getShape(copy);
-      if (copy.yPos + curShape.length >= COL_SIZE) {
-        this.setState({ futureYPos: copy.yPos });
+      let curShape = s.getFutureShape(this.state);
+      if (this.state.futureYPos + curShape.length >= COL_SIZE) {
         return;
       }
+
       curShape[0].forEach((_, pos) => {
         let newArray = curShape.map((row) =>
           row[pos] === s.DEFAULT_VALUE ? -1 : row[pos] + ROW_SIZE
         );
         let bottomValue = Math.max.apply(Math, newArray);
+
         if (
           // handling the shape before it touches the board
-          copy.board[bottomValue] !== undefined &&
+          this.state.board[bottomValue] !== undefined &&
           // checking if there is no collision
-          copy.board[bottomValue] !== s.DEFAULT_VALUE
+          this.state.board[bottomValue] >= 0
         ) {
-          this.setState({ futureYPos: copy.yPos });
+          flag = false;
           return;
         }
       });
 
-      copy.yPos = copy.yPos + 1;
+      if (flag === false) {
+        return;
+      }
+
+      this.setState({ futureYPos: this.state.futureYPos + 1 });
+      x++;
     }
   };
 
-  updateBoard = ({ shapePos }) => {
+  updateBoard = ({ shapePos, futurePos }) => {
     let board = [...this.state.board];
+
+    let futureShape = s.getFutureShape(this.state);
+    futureShape.forEach((row) =>
+      row.forEach((pos) => {
+        if (pos !== s.DEFAULT_VALUE) {
+          board[pos] = futurePos;
+        }
+      })
+    );
+
     let curShape = s.getShape(this.state);
     curShape.forEach((row) =>
       row.forEach((pos) => {
@@ -243,6 +273,7 @@ class App extends Component {
         }
       })
     );
+
     this.setState({ board: board });
   };
 
@@ -250,7 +281,7 @@ class App extends Component {
     this.mutex.lock();
 
     // clearing the board
-    this.updateBoard({ shapePos: s.DEFAULT_VALUE });
+    this.updateBoard({ shapePos: s.DEFAULT_VALUE, futurePos: s.DEFAULT_VALUE });
 
     switch (keyCode) {
       case LEFT:
@@ -265,8 +296,15 @@ class App extends Component {
         // this.detectCollision();
         this.shiftDown();
         break;
+      case SPACE:
+        this.setState({ yPos: this.state.futureYPos });
+        this.getNextBlock();
+        break;
     }
-    this.updateBoard(this.state);
+    this.updateBoard({
+      shapePos: this.state.shapePos,
+      futurePos: -2,
+    });
   };
 
   render() {
