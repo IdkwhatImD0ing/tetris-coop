@@ -32,8 +32,24 @@ export default function GameSelect(props) {
             <Button variant="container" onClick={() => navigate("/single")}>
               Single Player
             </Button>
-            <Button variant="container">Co-op</Button>
-            <Button variant="container">Versus</Button>
+            <Button
+              variant="container"
+              onClick={() => {
+                navigate("/lobby");
+                props.setMode(0);
+              }}
+            >
+              Co-op
+            </Button>
+            <Button
+              variant="container"
+              onClick={() => {
+                navigate("/lobby");
+                props.setMode(1);
+              }}
+            >
+              Versus
+            </Button>
           </Stack>
         </Stack>
       </Box>
