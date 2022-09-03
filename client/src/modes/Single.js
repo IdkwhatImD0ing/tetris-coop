@@ -1,9 +1,9 @@
 import "./Single.css";
-import React, { Component } from "react";
+import React, { Component, useEffect } from "react";
 import { COL_SIZE, ROW_SIZE } from "../components/shape";
 import * as s from "../components/shape";
 import Square from "../components/square";
-import Mutex from "await-mutex";
+import throttle from "lodash.throttle";
 
 const style = {
   width: "250px",
@@ -27,22 +27,18 @@ class Single extends Component {
   constructor(props) {
     super(props);
     this.state = s.InitialState();
-    this.futurePosition();
-    this.mutex = new Mutex();
   }
 
   resetGame = () => this.setState(s.InitialState());
 
   componentDidMount() {
     this.periodicInterval = setInterval(() => {
-      this.mutex.lock();
       this.updateBoard({
         shapePos: s.DEFAULT_VALUE,
         futurePos: -2,
       });
       this.shiftDown();
       this.updateBoard({ shapePos: this.state.shapePos, futurePos: -2 });
-      this.setState({ score: this.state.score + 1 });
     }, this.state.speed);
     document.onkeydown = this.keyInput;
   }
@@ -135,13 +131,13 @@ class Single extends Component {
     }
   };
 
-  getNextBlock = () => {
+  getNextBlock = throttle(() => {
+    let isFilled = false;
     let curShape = s.getShape(this.state);
     this.updateBoard({
       shapePos: this.state.shapePos,
       futurePos: -2,
     });
-
     for (let i = 0; i < curShape.length; i++) {
       // getting the row that the shape is touching
       let row = [...Array(ROW_SIZE)].map(
@@ -149,12 +145,14 @@ class Single extends Component {
       );
 
       // getting the value of all the bottom elements
-      let isFilled =
+      isFilled =
         row
           .map((pos) => this.state.board[pos])
           // checking the squares which are not filled
-          .filter((val) => val !== s.DEFAULT_VALUE).length === ROW_SIZE;
+          .filter((val) => val >= 0).length === ROW_SIZE;
       if (isFilled) {
+        this.setState({ score: this.state.score + 1 });
+        isFilled = false;
         let board = [...this.state.board];
         // clearing the row
         row.forEach((pos) => (board[pos] = s.DEFAULT_VALUE));
@@ -178,17 +176,19 @@ class Single extends Component {
       futureYPos: -3,
       rotatePos: 0,
     });
+    console.log("Calling Future");
     this.futurePosition();
-  };
+  }, 1000);
 
   shiftDown = () => {
     let curShape = s.getShape(this.state);
     // Checking if bottom of the board is touched
     if (this.state.yPos + curShape.length >= COL_SIZE) {
+      console.log("next block");
       this.getNextBlock();
       return;
     }
-
+    let flag = false;
     // checking that there is no conflict
     curShape[0].forEach((_, pos) => {
       let newArray = curShape.map((row) =>
@@ -205,20 +205,27 @@ class Single extends Component {
       ) {
         if (this.state.yPos <= 0 && this.state.yPos !== -3) {
           this.getNextBlock();
+          console.log("next block");
           alert("Game Over");
           this.resetGame();
         } else {
+          console.log("next block");
           this.getNextBlock();
         }
+        flag = true;
         return;
       }
     });
+
+    if (flag) {
+      return;
+    }
 
     this.setState({ yPos: this.state.yPos + 1 });
   };
 
   futurePosition = () => {
-    //console.log(copy);
+    console.log("Future Called");
 
     //Starts from the current block position
     this.setState({
@@ -227,7 +234,10 @@ class Single extends Component {
     });
     let flag = true;
     let x = 0;
-    while (x < COL_SIZE + 10) {
+
+    console.log(this.state);
+
+    while (x < COL_SIZE + 3) {
       //console.log("Loop");
       let curShape = s.getFutureShape(this.state);
       if (this.state.futureYPos + curShape.length >= COL_SIZE) {
@@ -285,8 +295,6 @@ class Single extends Component {
   };
 
   keyInput = ({ keyCode }) => {
-    this.mutex.lock();
-
     // clearing the board
     this.updateBoard({ shapePos: s.DEFAULT_VALUE, futurePos: s.DEFAULT_VALUE });
 
@@ -305,7 +313,6 @@ class Single extends Component {
         break;
       case SPACE:
         this.setState({ yPos: this.state.futureYPos });
-        this.getNextBlock();
         break;
     }
     this.updateBoard({
@@ -320,8 +327,9 @@ class Single extends Component {
     ));
     return (
       <div className="App">
-        <h1> Tetris {this.state.score}</h1>
-        <p> Right|Left|Z|X|Space </p>
+        <h1> Tetris </h1>
+        <h2> Points: {this.state.score}</h2>
+        <p> Controls: Right | Left | Down | Z | X | Space </p>
         <div style={style}> {board} </div>
       </div>
     );
