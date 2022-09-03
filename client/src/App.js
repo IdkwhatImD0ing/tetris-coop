@@ -70,6 +70,12 @@ class App extends Component {
       return;
     }
 
+    if (this.state.yPos < 0) {
+      this.setState({ xPos: this.state.xPos + deltaX });
+      this.futurePosition();
+      return;
+    }
+
     //Making sure we are not overlaping other shape
     let isConflict = false;
 
@@ -93,6 +99,7 @@ class App extends Component {
 
   // rotate
   rotateClockwise = (isClockwise) => {
+    let oldShape = s.getShape(this.state);
     let newState = { ...this.state };
     newState.rotatePos = s.rotateShape(isClockwise, this.state);
     let newShape = s.getShape(newState);
@@ -117,7 +124,7 @@ class App extends Component {
       // checking for conflict and making sure it is not going off edge
       if (
         conflictedArray.length !== 0 ||
-        newState.xPos + newShape.length >= ROW_SIZE
+        newState.xPos + oldShape.length > ROW_SIZE
       ) {
         isConflict = true;
       }
@@ -220,7 +227,7 @@ class App extends Component {
     });
     let flag = true;
     let x = 0;
-    while (x < 100) {
+    while (x < COL_SIZE + 10) {
       //console.log("Loop");
       let curShape = s.getFutureShape(this.state);
       if (this.state.futureYPos + curShape.length >= COL_SIZE) {
