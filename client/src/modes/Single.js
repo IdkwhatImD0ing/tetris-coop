@@ -3,7 +3,7 @@ import React, { Component, useEffect } from "react";
 import { COL_SIZE, ROW_SIZE } from "../components/shape";
 import * as s from "../components/shape";
 import Square from "../components/square";
-import throttle from "lodash.throttle";
+import debounce from "lodash.debounce";
 
 const style = {
   width: "250px",
@@ -131,7 +131,7 @@ class Single extends Component {
     }
   };
 
-  getNextBlock = throttle(() => {
+  getNextBlock = debounce(() => {
     let isFilled = false;
     let curShape = s.getShape(this.state);
     this.updateBoard({
@@ -178,7 +178,7 @@ class Single extends Component {
     });
     console.log("Calling Future");
     this.futurePosition();
-  }, 1000);
+  }, 100);
 
   shiftDown = () => {
     let curShape = s.getShape(this.state);
