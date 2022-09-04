@@ -58,7 +58,7 @@ class VersusGame {
     } else if (this.state[playerId] === "playerTwoState") {
       this.state.playerTwoReady = true;
     }
-    await hop.channels.patchState(this.channelId, {
+    hop.channels.patchState(this.channelId, {
       playerOneReady: this.state.playerOneReady,
       playerTwoReady: this.state.playerTwoReady,
     });
@@ -71,7 +71,7 @@ class VersusGame {
     console.log("gameStarted");
     this.started = true;
     this.state.gameStarted = true;
-    await hop.channels.patchState(this.channelId, {
+    hop.channels.patchState(this.channelId, {
       gameStarted: true,
     });
     this.state[this.state[this.state.playerOneId]].shapePos = getRandomShape();
@@ -102,7 +102,7 @@ class VersusGame {
     console.log("gameeEnded");
     this.started = false;
     this.state.gameStarted = false;
-    await hop.channels.patchState(this.channelId, {
+    hop.channels.patchState(this.channelId, {
       gameStarted: false,
     });
   }
@@ -130,7 +130,7 @@ class VersusGame {
     if (state.yPos < 0) {
       state.xPos = state.xPos + deltaX;
       this.state[this.state[playerId]] = state;
-      await hop.channels.patchState(this.channelId, {
+      hop.channels.patchState(this.channelId, {
         [this.state[playerId]]: state,
       });
       this.futurePosition(playerId);
@@ -154,7 +154,7 @@ class VersusGame {
     if (!isConflict) {
       state.xPos = state.xPos + deltaX;
       this.state[this.state[playerId]] = state;
-      await hop.channels.patchState(this.channelId, {
+      hop.channels.patchState(this.channelId, {
         [this.state[playerId]]: state,
       });
       this.futurePosition(playerId);
@@ -198,7 +198,7 @@ class VersusGame {
     if (!isConflict) {
       state.rotatePos = newState.rotatePos;
       this.state[this.state[playerId]] = state;
-      await hop.channels.patchState(this.channelId, {
+      hop.channels.patchState(this.channelId, {
         [this.state[playerId]]: state,
       });
       this.futurePosition(playerId);
@@ -223,7 +223,7 @@ class VersusGame {
           .filter((val) => val >= 0).length === ROW_SIZE;
       if (isFilled) {
         state.score += 1;
-        await hop.channels.patchState(this.channelId, {
+        hop.channels.patchState(this.channelId, {
           [this.state[playerId].score]: state.score,
         });
         isFilled = false;
@@ -249,7 +249,7 @@ class VersusGame {
     state.futureXPos = ROW_SIZE / 2;
     state.rotatePos = 0;
     this.state[this.state[playerId]] = state;
-    await hop.channels.patchState(this.channelId, {
+    hop.channels.patchState(this.channelId, {
       [this.state[playerId]]: state,
       speed: this.state.speed,
     });
@@ -296,7 +296,7 @@ class VersusGame {
     }
     state.yPos = state.yPos + 1;
     this.state[this.state[playerId]] = state;
-    await hop.channels.patchState(this.channelId, {
+    hop.channels.patchState(this.channelId, {
       [this.state[playerId]]: state,
     });
   };
@@ -305,7 +305,7 @@ class VersusGame {
     let state = this.state[this.state[playerId]];
     state.yPos = state.futureYPos;
     this.state[this.state[playerId]] = state;
-    await hop.channels.patchState(this.channelId, {
+    hop.channels.patchState(this.channelId, {
       [this.state[playerId]]: state,
     });
   };
@@ -323,7 +323,7 @@ class VersusGame {
       let curShape = getFutureShape(state);
       if (state.futureYPos + curShape.length >= COL_SIZE) {
         this.state[this.state[playerId]] = state;
-        await hop.channels.patchState(this.channelId, {
+        hop.channels.patchState(this.channelId, {
           [this.state[playerId]]: state,
         });
         return;
@@ -348,7 +348,7 @@ class VersusGame {
 
       if (flag === false) {
         this.state[this.state[playerId]] = state;
-        await hop.channels.patchState(this.channelId, {
+        hop.channels.patchState(this.channelId, {
           [this.state[playerId]]: state,
         });
         return;
@@ -357,7 +357,7 @@ class VersusGame {
       state.futureYPos = state.futureYPos + 1;
     }
     this.state[this.state[playerId]] = state;
-    await hop.channels.patchState(this.channelId, {
+    hop.channels.patchState(this.channelId, {
       [this.state[playerId]]: state,
     });
   };
@@ -387,7 +387,7 @@ class VersusGame {
 
     state.board = board;
     this.state[this.state[playerId]] = state;
-    await hop.channels.patchState(this.channelId, {
+    hop.channels.patchState(this.channelId, {
       [this.state[playerId]]: state,
     });
   };
