@@ -159,6 +159,7 @@ app.get("/ready", (req, res) => {
 app.get("/keypress", (req, res) => {
   const keyCode = req.get("keyCode");
   const id = req.get("id");
+  console.log("keypress " + keyCode);
   const channelId = req.get("channelId");
   const game = GAMES.get(channelId);
   if (game) {
@@ -185,7 +186,7 @@ app.get("/keypress", (req, res) => {
         break;
     }
     game.updateBoard(id, {
-      shapePos: game.state.shapePos,
+      shapePos: game.state[game.state[id]].shapePos,
       futurePos: -2,
     });
   }

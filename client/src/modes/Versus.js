@@ -36,7 +36,7 @@ export default function VersusGame(props) {
         headers: { name: name, id: playerId, channelId: channelId },
       }).then((res) => res.json());
     }
-    document.onkeydown = keyInput;
+    window.addEventListener("keydown", keyInput);
   }, []);
 
   function createName(name) {
@@ -58,7 +58,11 @@ export default function VersusGame(props) {
     }).then((res) => res.json());
   }
 
-  const keyInput = ({ keyCode }) => {
+  const keyInput = (event) => {
+    const { key, keyCode } = event;
+    if (!state) {
+      return;
+    }
     if (state.gameStarted) {
       fetch("/keypress", {
         headers: { keyCode: keyCode, id: playerId, channelId: channelId },

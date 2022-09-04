@@ -71,25 +71,19 @@ class VersusGame {
       });
       this.shiftDown(this.state.playerOneId);
       this.updateBoard(this.state.playerOneId, {
-        shapePos: this.state.shapePos,
+        shapePos: this.state[this.state[this.state.playerOneId]].shapePos,
         futurePos: -2,
       });
       this.updateBoard(this.state.playerTwoId, {
         shapePos: DEFAULT_VALUE,
         futurePos: -2,
       });
-      this.shiftDown(playerTwoId);
+      this.shiftDown(this.state.playerTwoId);
       this.updateBoard(this.state.playerTwoId, {
-        shapePos: this.state.shapePos,
+        shapePos: this.state[this.state[this.state.playerTwoId]].shapePos,
         futurePos: -2,
       });
     }, this.state.speed);
-    hop.channels.setState(this.channelId, (s) => ({
-      ...s,
-      gameStarted: this.state.gameStarted,
-      playerOneState: this.state.playerOneState,
-      playerTwoState: this.state.playerTwoState,
-    }));
   }
 
   // Shifting
@@ -132,7 +126,7 @@ class VersusGame {
       // checking the edge most value after we shift
       let edgeValue = func(newArray) + deltaX;
       // checking that there is no conflict
-      if (this.state.board[edgeValue] !== DEFAULT_VALUE) {
+      if (state.board[edgeValue] !== DEFAULT_VALUE) {
         isConflict = true;
       }
     });
@@ -144,7 +138,7 @@ class VersusGame {
         ...s,
         [this.state[playerId]]: state,
       }));
-      this.futurePosition();
+      this.futurePosition(playerId);
     }
   };
 
@@ -164,7 +158,7 @@ class VersusGame {
           // removing values that are not there in shape
           elem !== DEFAULT_VALUE &&
           // remove values that don't conflict with other shape
-          this.state.board[elem] !== DEFAULT_VALUE
+          state.board[elem] !== DEFAULT_VALUE
       );
       /*console.log(
         newArray,
@@ -189,7 +183,7 @@ class VersusGame {
         ...s,
         [this.state[playerId]]: state,
       }));
-      this.futurePosition();
+      this.futurePosition(playerId);
     }
   };
 
@@ -206,13 +200,13 @@ class VersusGame {
       // getting the value of all the bottom elements
       isFilled =
         row
-          .map((pos) => this.state.board[pos])
+          .map((pos) => state.board[pos])
           // checking the squares which are not filled
           .filter((val) => val >= 0).length === ROW_SIZE;
       if (isFilled) {
         this.state.score += 1;
         isFilled = false;
-        let board = [...this.state.board];
+        let board = [...state.board];
         // clearing the row
         row.forEach((pos) => (board[pos] = DEFAULT_VALUE));
         // dropiing the above row by one column
@@ -222,7 +216,7 @@ class VersusGame {
             board[j] = DEFAULT_VALUE;
           }
         }
-        this.state.board = board;
+        state.board = board;
       }
     }
 
@@ -240,7 +234,7 @@ class VersusGame {
       speed: this.state.speed,
     }));
 
-    this.futurePosition();
+    this.futurePosition(playerId);
   }, 100);
 
   shiftDown = (playerId) => {
@@ -248,8 +242,7 @@ class VersusGame {
     let curShape = getShape(state);
     // Checking if bottom of the board is touched
     if (state.yPos + curShape.length >= COL_SIZE) {
-      console.log("next block");
-      this.getNextBlock();
+      this.getNextBlock(playerId);
       return;
     }
     let flag = false;
@@ -263,17 +256,15 @@ class VersusGame {
       //console.log(bottomValue);
       if (
         // handling the shape before it touches the board
-        this.state.board[bottomValue] !== undefined &&
+        state.board[bottomValue] !== undefined &&
         // checking if there is no collision
-        this.state.board[bottomValue] >= 0
+        state.board[bottomValue] >= 0
       ) {
         if (state.yPos <= 0 && state.yPos !== -3) {
-          this.getNextBlock();
-          console.log("next block");
+          this.getNextBlock(playerId);
           alert("Game Over");
         } else {
-          console.log("next block");
-          this.getNextBlock();
+          this.getNextBlock(playerId);
         }
         flag = true;
         return;
@@ -292,6 +283,7 @@ class VersusGame {
   };
 
   maxDown = (playerId) => {
+    console.log("Max down");
     state = this.state[this.state[playerId]];
     state.yPos = state.futureYPos;
     this.state[this.state[playerId]] = state;
@@ -306,11 +298,8 @@ class VersusGame {
     //Starts from the current block position
     state.futureXPos = state.xPos;
     state.futureYPos = state.yPos;
-
     let flag = true;
     let x = 0;
-
-    console.log(this.state);
 
     while (x < COL_SIZE + 3) {
       //console.log("Loop");
@@ -332,9 +321,9 @@ class VersusGame {
 
         if (
           // handling the shape before it touches the board
-          this.state.board[bottomValue] !== undefined &&
+          state.board[bottomValue] !== undefined &&
           // checking if there is no collision
-          this.state.board[bottomValue] >= 0
+          state.board[bottomValue] >= 0
         ) {
           flag = false;
           return;
