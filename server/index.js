@@ -132,10 +132,8 @@ app.get("/createVersusChannel", async (req, res) => {
 });
 
 app.get("/joingame", (req, res) => {
-  console.log("joining game");
   const name = req.get("name");
   const id = req.get("id");
-  console.log(id);
   const channelId = req.get("channelId");
   const game = GAMES.get(channelId);
   if (game) {

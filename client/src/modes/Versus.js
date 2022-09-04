@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   Box,
@@ -27,6 +27,8 @@ export default function VersusGame(props) {
   const channelId = params.get("channelId");
 
   const { state } = useReadChannelState(channelId);
+  const stateRef = useRef(state);
+  stateRef.current = state;
   const [name, setName] = React.useState(props.name);
   const [playerId, setPlayerId] = React.useState(props.playerId);
 
@@ -58,12 +60,14 @@ export default function VersusGame(props) {
     }).then((res) => res.json());
   }
 
-  const keyInput = (event) => {
+  let keyInput = (event) => {
     const { key, keyCode } = event;
-    if (!state) {
+    if (!stateRef) {
       return;
     }
-    if (state.gameStarted) {
+    console.log(keyCode);
+    console.log(stateRef.current);
+    if (stateRef.current.gameStarted) {
       fetch("/keypress", {
         headers: { keyCode: keyCode, id: playerId, channelId: channelId },
       }).then((res) => res.json());
@@ -133,7 +137,7 @@ export default function VersusGame(props) {
               Ready
             </Button>
           </Stack>
-          {state.playerOneReady && state.playerTwoReady && (
+          {state.gameStarted && (
             <Stack
               direction="row"
               spacing={10}
