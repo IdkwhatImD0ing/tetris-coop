@@ -9,12 +9,12 @@ const { VersusGame } = require("./versusgame");
 const ROW_SIZE = 8;
 const COL_SIZE = 20;
 const DEFAULT_VALUE = -1;
-const LEFT = 37; /* left arrow */
-const ROTATE_UP = 90; /* z */
-const RIGHT = 39; /* right arrow */
-const ROTATE_DOWN = 88; /* x */
-const DOWN = 40; /* down arrow */
-const SPACE = 32; /* space */
+const LEFT = "37"; /* left arrow */
+const ROTATE_UP = "90"; /* z */
+const RIGHT = "39"; /* right arrow */
+const ROTATE_DOWN = "88"; /* x */
+const DOWN = "40"; /* down arrow */
+const SPACE = "32"; /* space */
 
 const GAMES = new Map();
 
@@ -158,7 +158,6 @@ app.get("/keypress", (req, res) => {
   const keyCode = req.get("keyCode");
   const id = req.get("id");
   const name = req.get("name");
-  console.log("name " + name + "keypress " + keyCode + " " + id);
   const channelId = req.get("channelId");
   const game = GAMES.get(channelId);
   if (game) {
@@ -166,7 +165,6 @@ app.get("/keypress", (req, res) => {
       shapePos: DEFAULT_VALUE,
       futurePos: DEFAULT_VALUE,
     });
-
     switch (keyCode) {
       case LEFT:
       case RIGHT:

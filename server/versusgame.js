@@ -290,8 +290,7 @@ class VersusGame {
   };
 
   maxDown = (playerId) => {
-    console.log("Max down");
-    state = this.state[this.state[playerId]];
+    let state = this.state[this.state[playerId]];
     state.yPos = state.futureYPos;
     this.state[this.state[playerId]] = state;
     hop.channels.patchState(this.channelId, {

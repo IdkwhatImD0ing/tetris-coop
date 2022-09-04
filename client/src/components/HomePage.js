@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function Home(props) {
-  const [temp, setTemp] = useState("");
+  const [temp, setTemp] = useState(null);
 
   const handleChange = (e) => {
     setTemp(e.target.value);

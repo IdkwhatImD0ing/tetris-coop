@@ -50,14 +50,7 @@ export default function App() {
         <Route path="/coop" element={<CoopGame />} />
         <Route
           path="/versus"
-          element={
-            <VersusGame
-              name={name}
-              playerId={id}
-              setName={setName}
-              setPlayerId={setId}
-            />
-          }
+          element={<VersusGame name={name} playerId={id} />}
         />
         <Route path="/api" element={<Api id={id} name={name} />} />
         <Route path="/single" element={<Single />} />

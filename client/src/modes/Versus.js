@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   Box,
@@ -25,12 +25,16 @@ export default function VersusGame(props) {
   const [params] = useSearchParams();
   //console.log(params.get("channelId"));
   const channelId = params.get("channelId");
-  const name = props.name;
-  const playerId = props.playerId;
+  const [name, setName] = useState(props.name);
+  const [playerId, setPlayerId] = useState(props.playerId);
 
   const { state } = useReadChannelState(channelId);
   const stateRef = useRef(state);
+  const nameRef = useRef(name);
+  const idRef = useRef(playerId);
   stateRef.current = state;
+  nameRef.current = name;
+  idRef.current = playerId;
 
   useEffect(() => {
     if (name) {
@@ -41,16 +45,18 @@ export default function VersusGame(props) {
     window.addEventListener("keydown", keyInput);
   }, []);
 
-  function createName(name) {
-    props.setName(name);
+  function createName(tempName) {
+    console.log("createName Called " + tempName);
+    const name = tempName;
+    setName(tempName);
     let temp =
       Date.now().toString(36) +
       Math.floor(
         Math.pow(10, 12) + Math.random() * 9 * Math.pow(10, 12)
       ).toString(36);
-    props.setPlayerId(temp);
+    setPlayerId(temp);
     fetch("/joingame", {
-      headers: { name: name, id: temp, channelId: channelId },
+      headers: { name: tempName, id: temp, channelId: channelId },
     }).then((res) => res.json());
   }
 
@@ -61,18 +67,19 @@ export default function VersusGame(props) {
   }
 
   let keyInput = (event) => {
-    const { key, keyCode } = event;
+    const { keyCode } = event;
     if (!stateRef) {
       return;
     }
-    console.log(keyCode);
-    console.log(stateRef.current);
-    if (stateRef.current.gameStarted) {
+    if (
+      stateRef.current.gameStarted ||
+      (stateRef.current.playerOneReady && stateRef.current.playerTwoReady)
+    ) {
       fetch("/keypress", {
         headers: {
           keyCode: keyCode,
-          nanme: name,
-          id: playerId,
+          name: nameRef.current,
+          id: idRef.current,
           channelId: channelId,
         },
       }).then((res) => res.json());
