@@ -25,12 +25,12 @@ export default function VersusGame(props) {
   const [params] = useSearchParams();
   //console.log(params.get("channelId"));
   const channelId = params.get("channelId");
+  const name = props.name;
+  const playerId = props.playerId;
 
   const { state } = useReadChannelState(channelId);
   const stateRef = useRef(state);
   stateRef.current = state;
-  const [name, setName] = React.useState(props.name);
-  const [playerId, setPlayerId] = React.useState(props.playerId);
 
   useEffect(() => {
     if (name) {
@@ -42,13 +42,13 @@ export default function VersusGame(props) {
   }, []);
 
   function createName(name) {
-    setName(name);
+    props.setName(name);
     let temp =
       Date.now().toString(36) +
       Math.floor(
         Math.pow(10, 12) + Math.random() * 9 * Math.pow(10, 12)
       ).toString(36);
-    setPlayerId(temp);
+    props.setPlayerId(temp);
     fetch("/joingame", {
       headers: { name: name, id: temp, channelId: channelId },
     }).then((res) => res.json());
@@ -69,7 +69,12 @@ export default function VersusGame(props) {
     console.log(stateRef.current);
     if (stateRef.current.gameStarted) {
       fetch("/keypress", {
-        headers: { keyCode: keyCode, id: playerId, channelId: channelId },
+        headers: {
+          keyCode: keyCode,
+          nanme: name,
+          id: playerId,
+          channelId: channelId,
+        },
       }).then((res) => res.json());
     }
   };
@@ -137,7 +142,8 @@ export default function VersusGame(props) {
               Ready
             </Button>
           </Stack>
-          {state.gameStarted && (
+          {(state.gameStarted ||
+            (state.playerOneReady && state.playerTwoReady)) && (
             <Stack
               direction="row"
               spacing={10}

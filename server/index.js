@@ -157,7 +157,8 @@ app.get("/ready", (req, res) => {
 app.get("/keypress", (req, res) => {
   const keyCode = req.get("keyCode");
   const id = req.get("id");
-  console.log("keypress " + keyCode);
+  const name = req.get("name");
+  console.log("name " + name + "keypress " + keyCode + " " + id);
   const channelId = req.get("channelId");
   const game = GAMES.get(channelId);
   if (game) {

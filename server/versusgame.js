@@ -28,13 +28,24 @@ class VersusGame {
       this.state.playerOne = true;
       this.state.playerOneName = name;
       this.state.playerOneId = playerId;
+      hop.channels.patchState(this.channelId, {
+        [playerId]: this.state[playerId],
+        playerOne: this.state.playerOne,
+        playerOneName: this.state.playerOneName,
+        playerOneId: this.state.playerOneId,
+      });
     } else if (!this.state.playerTwo) {
       this.state[playerId] = "playerTwoState";
       this.state.playerTwo = true;
       this.state.playerTwoName = name;
       this.state.playerTwoId = playerId;
+      hop.channels.patchState(this.channelId, {
+        [playerId]: this.state[playerId],
+        playerTwo: this.state.playerTwo,
+        playerTwoName: this.state.playerTwoName,
+        playerTwoId: this.state.playerTwoId,
+      });
     }
-    hop.channels.setState(this.channelId, this.state);
   }
 
   ready(playerId) {
@@ -111,7 +122,7 @@ class VersusGame {
       state.xPos = state.xPos + deltaX;
       this.state[this.state[playerId]] = state;
       hop.channels.patchState(this.channelId, {
-        [this.state[playerId].xPos]: state.xPos,
+        [this.state[playerId]]: state,
       });
       this.futurePosition(playerId);
       return;
@@ -135,7 +146,7 @@ class VersusGame {
       state.xPos = state.xPos + deltaX;
       this.state[this.state[playerId]] = state;
       hop.channels.patchState(this.channelId, {
-        [this.state[playerId].xPos]: state.xPos,
+        [this.state[playerId]]: state,
       });
       this.futurePosition(playerId);
     }
@@ -179,7 +190,7 @@ class VersusGame {
       state.rotatePos = newState.rotatePos;
       this.state[this.state[playerId]] = state;
       hop.channels.patchState(this.channelId, {
-        [this.state[playerId].rotatePos]: state.rotatePos,
+        [this.state[playerId]]: state,
       });
       this.futurePosition(playerId);
     }
@@ -274,7 +285,7 @@ class VersusGame {
     state.yPos = state.yPos + 1;
     this.state[this.state[playerId]] = state;
     hop.channels.patchState(this.channelId, {
-      [this.state[playerId].yPos]: state.yPos,
+      [this.state[playerId]]: state,
     });
   };
 
@@ -284,7 +295,7 @@ class VersusGame {
     state.yPos = state.futureYPos;
     this.state[this.state[playerId]] = state;
     hop.channels.patchState(this.channelId, {
-      [this.state[playerId].yPos]: state.yPos,
+      [this.state[playerId]]: state,
     });
   };
 
@@ -302,7 +313,7 @@ class VersusGame {
       if (state.futureYPos + curShape.length >= COL_SIZE) {
         this.state[this.state[playerId]] = state;
         hop.channels.patchState(this.channelId, {
-          [this.state[playerId].futureYPos]: state.futureYPos,
+          [this.state[playerId]]: state,
         });
         return;
       }
@@ -327,7 +338,7 @@ class VersusGame {
       if (flag === false) {
         this.state[this.state[playerId]] = state;
         hop.channels.patchState(this.channelId, {
-          [this.state[playerId].futureYPos]: state.futureYPos,
+          [this.state[playerId]]: state,
         });
         return;
       }
@@ -336,14 +347,14 @@ class VersusGame {
     }
     this.state[this.state[playerId]] = state;
     hop.channels.patchState(this.channelId, {
-      [this.state[playerId].futureYPos]: state.futureYPos,
+      [this.state[playerId]]: state,
     });
   };
 
   // Updates the Board for both users, not meant to be shown
   updateBoard = (playerId, { shapePos, futurePos }) => {
     let state = this.state[this.state[playerId]];
-    let board = [...state.board];
+    let board = state.board;
 
     let futureShape = getFutureShape(state);
     futureShape.forEach((row) =>
@@ -366,7 +377,7 @@ class VersusGame {
     state.board = board;
     this.state[this.state[playerId]] = state;
     hop.channels.patchState(this.channelId, {
-      [this.state[playerId].board]: state.board,
+      [this.state[playerId]]: state,
     });
   };
 }
