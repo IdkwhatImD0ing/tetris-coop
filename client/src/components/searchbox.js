@@ -1,5 +1,4 @@
-import { Paper, InputBase, Divider } from "@mui/material";
-import { IconButton } from "@mui/material";
+import { Paper, InputBase } from "@mui/material";
 
 export default function SearchBox(props) {
   const { placeholder, handleChange, handleSubmit } = props;

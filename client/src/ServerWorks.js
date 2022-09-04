@@ -13,7 +13,7 @@ function Api(props) {
     fetch("/create", { headers: { name: props.name, id: props.id } })
       .then((res) => res.json())
       .then((data) => setData2(data.message));
-  }, []);
+  });
   return (
     <div className="App">
       <header className="App-header">
@@ -21,7 +21,7 @@ function Api(props) {
         <p>{!data ? "Loading..." : data}</p>
         <p>{!data2 ? "Loading..." : data2}</p>
         <nav>
-          <Link to="/">Home</Link>
+          <Link to="/select">Home</Link>
         </nav>
       </header>
     </div>

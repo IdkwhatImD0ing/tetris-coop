@@ -48,9 +48,12 @@ export default function VersusGame(props) {
     window.addEventListener("keydown", keyInput);
   }, []);
 
+  useEffect(() => {
+    console.log("rerender");
+  });
+
   function createName(tempName) {
     console.log("createName Called " + tempName);
-    const name = tempName;
     setName(tempName);
     let temp =
       Date.now().toString(36) +

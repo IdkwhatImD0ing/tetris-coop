@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Routes, Route, Link, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import "./App.css";
 import Api from "./ServerWorks";
 import Single from "./modes/Single";

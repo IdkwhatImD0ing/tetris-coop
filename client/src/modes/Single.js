@@ -1,5 +1,5 @@
 import "./Single.css";
-import React, { Component, useEffect } from "react";
+import React, { Component } from "react";
 import { COL_SIZE, ROW_SIZE } from "../components/shape";
 import * as s from "../components/shape";
 import Square from "../components/square";
@@ -245,7 +245,7 @@ class Single extends Component {
         return;
       }
 
-      curShape[0].forEach((_, pos) => {
+      curShape[0].forEach((temp, pos) => {
         let newArray = curShape.map((row) =>
           row[pos] === s.DEFAULT_VALUE ? -1 : row[pos] + ROW_SIZE
         );
@@ -300,6 +300,8 @@ class Single extends Component {
     this.updateBoard({ shapePos: s.DEFAULT_VALUE, futurePos: s.DEFAULT_VALUE });
 
     switch (keyCode) {
+      default:
+        break;
       case LEFT:
       case RIGHT:
         this.shiftRight(keyCode === RIGHT);

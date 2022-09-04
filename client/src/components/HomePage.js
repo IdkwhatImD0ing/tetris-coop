@@ -1,7 +1,6 @@
 import { Box, Stack, Typography } from "@mui/material";
 import SearchBox from "./searchbox";
 import { useState } from "react";
-import { Link } from "react-router-dom";
 
 const url =
   "https://images.unsplash.com/photo-1465101162946-4377e57745c3?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1756&q=80";
