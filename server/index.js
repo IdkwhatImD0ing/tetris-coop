@@ -1,6 +1,7 @@
 require("dotenv").config();
 const { Hop, ChannelType } = require("@onehop/js");
 const express = require("express");
+const cors = require("cors");
 const PORT = process.env.PORT || 3001;
 const app = express();
 const hop = new Hop(process.env.REACT_APP_HOP_PROJECT_ENV);
@@ -25,6 +26,8 @@ const emptyBoard = () =>
 const createChannelId = () => {
   return Math.random().toString(16);
 };
+
+app.use(cors());
 
 app.get("/api", (req, res) => {
   res.json({ message: "Hello from Express!" });
@@ -172,7 +175,7 @@ app.get("/keypress", (req, res) => {
         break;
       case ROTATE_UP:
       case ROTATE_DOWN:
-        game.rotateClockwise(id, keyCode === ROTATE_UP);
+        game.rotateClockwise(id, keyCode !== ROTATE_UP);
         break;
       case DOWN:
         // this.detectCollision();
