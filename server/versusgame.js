@@ -48,7 +48,7 @@ class VersusGame {
     }
   }
 
-  ready(playerId) {
+  async ready(playerId) {
     if (this.started) {
       return;
     }
@@ -58,7 +58,7 @@ class VersusGame {
     } else if (this.state[playerId] === "playerTwoState") {
       this.state.playerTwoReady = true;
     }
-    hop.channels.patchState(this.channelId, {
+    await hop.channels.patchState(this.channelId, {
       playerOneReady: this.state.playerOneReady,
       playerTwoReady: this.state.playerTwoReady,
     });
@@ -67,11 +67,11 @@ class VersusGame {
     }
   }
 
-  startGame() {
+  async startGame() {
     console.log("gameStarted");
     this.started = true;
     this.state.gameStarted = true;
-    hop.channels.patchState(this.channelId, {
+    await hop.channels.patchState(this.channelId, {
       gameStarted: true,
     });
     this.state[this.state[this.state.playerOneId]].shapePos = getRandomShape();
@@ -96,6 +96,15 @@ class VersusGame {
         futurePos: -2,
       });
     }, this.state.speed);
+  }
+
+  async endGame() {
+    console.log("gameeEnded");
+    this.started = false;
+    this.state.gameStarted = false;
+    await hop.channels.patchState(this.channelId, {
+      gameStarted: false,
+    });
   }
 
   // Shifting
@@ -213,7 +222,10 @@ class VersusGame {
           // checking the squares which are not filled
           .filter((val) => val >= 0).length === ROW_SIZE;
       if (isFilled) {
-        this.state.score += 1;
+        state.score += 1;
+        hop.channels.patchState(this.channelId, {
+          [this.state[playerId].score]: state.score,
+        });
         isFilled = false;
         let board = [...state.board];
         // clearing the row
@@ -245,7 +257,7 @@ class VersusGame {
     this.futurePosition(playerId);
   }, 100);
 
-  shiftDown = (playerId) => {
+  shiftDown = async (playerId) => {
     let state = this.state[this.state[playerId]];
     let curShape = getShape(state);
     // Checking if bottom of the board is touched
@@ -255,7 +267,7 @@ class VersusGame {
     }
     let flag = false;
     // checking that there is no conflict
-    curShape[0].forEach((_, pos) => {
+    curShape[0].forEach(async (_, pos) => {
       let newArray = curShape.map((row) =>
         row[pos] === DEFAULT_VALUE ? -1 : row[pos] + ROW_SIZE
       );
@@ -269,8 +281,8 @@ class VersusGame {
         state.board[bottomValue] >= 0
       ) {
         if (state.yPos <= 0 && state.yPos !== -3) {
-          this.getNextBlock(playerId);
-          alert("Game Over");
+          clearInterval(this.periodicInterval);
+          this.endGame();
         } else {
           this.getNextBlock(playerId);
         }
