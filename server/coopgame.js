@@ -1,37 +1,35 @@
-import "./Single.css";
-import React, { Component, useEffect } from "react";
-import { COL_SIZE, ROW_SIZE } from "../components/shape";
-import * as s from "../components/shape";
-import Square from "../components/square";
-import debounce from "lodash.debounce";
+require("dotenv").config();
+const { Hop, ChannelType } = require("@onehop/js");
+const hop = new Hop(process.env.HOP_PROJECT_ENV);
 
-const style = {
-  width: "250px",
-  height: "250px",
-  margin: "0 auto",
-  display: "grid",
-  borderWidth: "10px",
-  gridTemplate: `repeat(${COL_SIZE}, 1fr) / repeat(${ROW_SIZE}, 1fr)`,
-};
-
-const LEFT = 37; /* left arrow */
-const ROTATE_UP = 90; /* z */
-const RIGHT = 39; /* right arrow */
-const ROTATE_DOWN = 88; /* x */
-const DOWN = 40; /* down arrow */
-const SPACE = 32; /* space */
+import { COL_SIZE, ROW_SIZE } from "./components/shape";
+import * as s from "./components/shape";
+import Square from "./components/square";
 
 const increaseSpeed = ({ speed }) => speed - 10 * (speed > 10);
 
-class Single extends Component {
-  constructor(props) {
-    super(props);
-    this.state = s.InitialState();
+export default class CoopGame {
+  constructor(channelId) {
+    this.channelId = channelId;
+    this.state = getState();
+    this.started = false;
   }
 
-  resetGame = () => this.setState(s.InitialState());
+  async getState() {
+    return await hop.channels.get(this.channelId);
+  }
 
-  componentDidMount() {
+  joinGame(playerId) {
+    if (!this.state.playerOne) {
+      this.state[playerId] = "playerOne";
+    } else if (!this.state.playerTwo) {
+      this.state[playerId] = "playerTwo";
+    }
+  }
+
+  startGame() {
+    this.started = true;
+    this.state.gameStarted = true;
     this.periodicInterval = setInterval(() => {
       this.updateBoard({
         shapePos: s.DEFAULT_VALUE,
@@ -40,35 +38,36 @@ class Single extends Component {
       this.shiftDown();
       this.updateBoard({ shapePos: this.state.shapePos, futurePos: -2 });
     }, this.state.speed);
-    document.onkeydown = this.keyInput;
   }
 
-  componentWillUnmount() {
-    clearInterval(this.periodicInterval);
-  }
-
-  // shift
-  shiftRight = (isRight) => {
-    let curShape = s.getShape(this.state);
+  // Shifting
+  shiftRight = (playerId, isRight) => {
+    let state = this.state[this.state[playerId]];
+    let curShape = s.getShape(state);
     let { deltaX, func, isEdge } = isRight
       ? {
           deltaX: 1,
           func: (edgeVal) => Math.max.apply(null, edgeVal),
-          isEdge: this.state.xPos + curShape[0].length === ROW_SIZE,
+          isEdge: state.xPos + curShape[0].length === ROW_SIZE,
         }
       : {
           deltaX: -1,
           func: (edgeVal) => Math.min.apply(null, edgeVal),
-          isEdge: this.state.xPos === 0,
+          isEdge: state.xPos === 0,
         };
     // Making sure we are not going off the edge
     if (isEdge) {
       return;
     }
 
-    if (this.state.yPos < 0) {
-      this.setState({ xPos: this.state.xPos + deltaX });
-      this.futurePosition();
+    if (state.yPos < 0) {
+      state.xPos = state.xPos + deltaX;
+      this.state[this.state[playerId]] = state;
+      hop.channels.setState(this.channelId, (s) => ({
+        ...s,
+        [this.state[playerId]]: state,
+      }));
+      this.futurePosition(playerId);
       return;
     }
 
@@ -86,18 +85,23 @@ class Single extends Component {
       }
     });
 
-    // Shifting if there is not conflict
     if (!isConflict) {
-      this.setState({ xPos: this.state.xPos + deltaX });
+      state.xPos = state.xPos + deltaX;
+      this.state[this.state[playerId]] = state;
+      hop.channels.setState(this.channelId, (s) => ({
+        ...s,
+        [this.state[playerId]]: state,
+      }));
       this.futurePosition();
     }
   };
 
-  // rotate
-  rotateClockwise = (isClockwise) => {
-    let oldShape = s.getShape(this.state);
-    let newState = { ...this.state };
-    newState.rotatePos = s.rotateShape(isClockwise, this.state);
+  // Rotate
+  rotateClockwise = (playerId, isClockwise) => {
+    let state = this.state[this.state[playerId]];
+    let oldShape = s.getShape(state);
+    let newState = { ...state };
+    newState.rotatePos = s.rotateShape(isClockwise, state);
     let newShape = s.getShape(newState);
 
     let isConflict = false;
@@ -125,20 +129,26 @@ class Single extends Component {
         isConflict = true;
       }
     });
+
     if (!isConflict) {
-      this.setState({ rotatePos: newState.rotatePos });
+      state.rotatePos = newState.rotatePos;
+      this.state[this.state[playerId]] = state;
+      hop.channels.setState(this.channelId, (s) => ({
+        ...s,
+        [this.state[playerId]]: state,
+      }));
       this.futurePosition();
     }
   };
 
-  getNextBlock = debounce(() => {
+  getNextBlock = debounce((playerId) => {
+    let state = this.state[this.state[playerId]];
     let isFilled = false;
-    let curShape = s.getShape(this.state);
-
+    let curShape = s.getShape(state);
     for (let i = 0; i < curShape.length; i++) {
       // getting the row that the shape is touching
       let row = [...Array(ROW_SIZE)].map(
-        (_, pos) => pos + ROW_SIZE * (this.state.yPos + i)
+        (_, pos) => pos + ROW_SIZE * (state.yPos + i)
       );
 
       // getting the value of all the bottom elements
@@ -148,7 +158,7 @@ class Single extends Component {
           // checking the squares which are not filled
           .filter((val) => val >= 0).length === ROW_SIZE;
       if (isFilled) {
-        this.setState({ score: this.state.score + 1 });
+        this.state.score += 1;
         isFilled = false;
         let board = [...this.state.board];
         // clearing the row
@@ -160,27 +170,31 @@ class Single extends Component {
             board[j] = s.DEFAULT_VALUE;
           }
         }
-        this.setState({ board: board });
+        this.state.board = board;
       }
     }
 
-    this.setState({
-      shapePos: s.getRandomShape(),
-      speed: increaseSpeed(this.state),
-      yPos: -3,
-      xPos: ROW_SIZE / 2,
-      futureXPos: ROW_SIZE / 2,
-      futureYPos: -3,
-      rotatePos: 0,
-    });
-    console.log("Calling Future");
+    state.shapePos = s.getRandomShape();
+    state.speed = increaseSpeed(state.speed);
+    state.yPos = -3;
+    state.xPos = ROW_SIZE / 2;
+    state.futureYPos = -3;
+    state.futureXPos = ROW_SIZE / 2;
+    state.rotatePos = 0;
+    this.state[this.state[playerId]] = state;
+    hop.channels.setState(this.channelId, (s) => ({
+      ...s,
+      [this.state[playerId]]: state,
+    }));
+
     this.futurePosition();
   }, 100);
 
-  shiftDown = () => {
-    let curShape = s.getShape(this.state);
+  shiftDown = (playerId) => {
+    let state = this.state[this.state[playerId]];
+    let curShape = s.getShape(state);
     // Checking if bottom of the board is touched
-    if (this.state.yPos + curShape.length >= COL_SIZE) {
+    if (state.yPos + curShape.length >= COL_SIZE) {
       console.log("next block");
       this.getNextBlock();
       return;
@@ -200,11 +214,10 @@ class Single extends Component {
         // checking if there is no collision
         this.state.board[bottomValue] >= 0
       ) {
-        if (this.state.yPos <= 0 && this.state.yPos !== -3) {
+        if (state.yPos <= 0 && state.yPos !== -3) {
           this.getNextBlock();
           console.log("next block");
           alert("Game Over");
-          this.resetGame();
         } else {
           console.log("next block");
           this.getNextBlock();
@@ -217,18 +230,20 @@ class Single extends Component {
     if (flag) {
       return;
     }
-
-    this.setState({ yPos: this.state.yPos + 1 });
+    state.yPos = state.yPos + 1;
+    this.state[this.state[playerId]] = state;
+    hop.channels.setState(this.channelId, (s) => ({
+      ...s,
+      [this.state[playerId]]: state,
+    }));
   };
 
-  futurePosition = () => {
-    console.log("Future Called");
-
+  futurePosition = (playerId) => {
+    let state = this.state[this.state[playerId]];
     //Starts from the current block position
-    this.setState({
-      futureXPos: this.state.xPos,
-      futureYPos: this.state.yPos,
-    });
+    state.futureXPos = state.xPos;
+    state.futureYPos = state.yPos;
+
     let flag = true;
     let x = 0;
 
@@ -236,8 +251,13 @@ class Single extends Component {
 
     while (x < COL_SIZE + 3) {
       //console.log("Loop");
-      let curShape = s.getFutureShape(this.state);
-      if (this.state.futureYPos + curShape.length >= COL_SIZE) {
+      let curShape = s.getFutureShape(state);
+      if (state.futureYPos + curShape.length >= COL_SIZE) {
+        this.state[this.state[playerId]] = state;
+        hop.channels.setState(this.channelId, (s) => ({
+          ...s,
+          [this.state[playerId]]: state,
+        }));
         return;
       }
 
@@ -259,57 +279,71 @@ class Single extends Component {
       });
 
       if (flag === false) {
+        this.state[this.state[playerId]] = state;
+        hop.channels.setState(this.channelId, (s) => ({
+          ...s,
+          [this.state[playerId]]: state,
+        }));
         return;
       }
-
-      this.setState({ futureYPos: this.state.futureYPos + 1 });
       x++;
+      state.futureYPos = state.futureYPos + 1;
     }
+    this.state[this.state[playerId]] = state;
+    hop.channels.setState(this.channelId, (s) => ({
+      ...s,
+      [this.state[playerId]]: state,
+    }));
   };
 
-  updateBoard = ({ shapePos, futurePos }) => {
+  // Updates the Board for both users, not meant to be shown
+  updateBoard = () => {
     let board = [...this.state.board];
+    let state = this.state[playerOne];
+    let stateTwo = this.state[playerTwo];
 
-    let futureShape = s.getFutureShape(this.state);
-    futureShape.forEach((row) =>
-      row.forEach((pos) => {
-        if (pos !== s.DEFAULT_VALUE) {
-          board[pos] = futurePos;
-        }
-      })
-    );
-
-    let curShape = s.getShape(this.state);
+    let curShape = s.getShape(state);
     curShape.forEach((row) =>
       row.forEach((pos) => {
         if (pos !== s.DEFAULT_VALUE) {
-          board[pos] = shapePos;
+          board[pos] = state.shapePos;
         }
       })
     );
 
-    this.setState({ board: board });
+    let curShapeTwo = s.getShape(stateTwo);
+    curShapeTwo.forEach((row) =>
+      row.forEach((pos) => {
+        if (pos !== s.DEFAULT_VALUE) {
+          board[pos] = stateTwo.shapePos;
+        }
+      })
+    );
+
+    this.state.board = board;
   };
 
-  keyInput = ({ keyCode }) => {
+  keyInput = (playerId, { keyCode }) => {
     // clearing the board
     this.updateBoard({ shapePos: s.DEFAULT_VALUE, futurePos: s.DEFAULT_VALUE });
 
     switch (keyCode) {
       case LEFT:
       case RIGHT:
-        this.shiftRight(keyCode === RIGHT);
+        this.shiftRight(playerId, keyCode === RIGHT);
         break;
       case ROTATE_UP:
       case ROTATE_DOWN:
-        this.rotateClockwise(keyCode === ROTATE_UP);
+        this.rotateClockwise(playerId, keyCode === ROTATE_UP);
         break;
       case DOWN:
         // this.detectCollision();
         this.shiftDown();
         break;
       case SPACE:
-        this.setState({ yPos: this.state.futureYPos });
+        state = this.state[this.state[playerId]];
+        state.yPos = state.futureYPos;
+        this.state[this.state[playerId]] = state;
         break;
     }
     this.updateBoard({
@@ -317,20 +351,4 @@ class Single extends Component {
       futurePos: -2,
     });
   };
-
-  render() {
-    const board = this.state.board.map((val, pos) => (
-      <Square key={pos} name={pos} color={val} />
-    ));
-    return (
-      <div className="App">
-        <h1> Tetris </h1>
-        <h2> Points: {this.state.score}</h2>
-        <p> Controls: Right | Left | Down | Z | X | Space </p>
-        <div style={style}> {board} </div>
-      </div>
-    );
-  }
 }
-
-export default Single;

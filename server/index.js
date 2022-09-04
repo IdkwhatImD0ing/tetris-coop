@@ -4,11 +4,19 @@ const express = require("express");
 const PORT = process.env.PORT || 3001;
 const app = express();
 const hop = new Hop(process.env.REACT_APP_HOP_PROJECT_ENV);
-const transport = require("./Transport");
+const VersusGame = require("./versusgame");
 
-export const ROW_SIZE = 8;
-export const COL_SIZE = 20;
-export const DEFAULT_VALUE = -1;
+const ROW_SIZE = 8;
+const COL_SIZE = 20;
+const DEFAULT_VALUE = -1;
+const LEFT = 37; /* left arrow */
+const ROTATE_UP = 90; /* z */
+const RIGHT = 39; /* right arrow */
+const ROTATE_DOWN = 88; /* x */
+const DOWN = 40; /* down arrow */
+const SPACE = 32; /* space */
+
+const GAMES = new Map();
 
 // creates empty board
 const emptyBoard = () =>
@@ -41,6 +49,10 @@ app.get("/createCoopChannel", async (req, res) => {
         playerTwo: false,
         playerOneReady: false,
         playerTwoReady: false,
+        playerOneName: "",
+        playerTwoName: "",
+        playerOneId: "",
+        playerTwoId: "",
         gameStarted: false,
         board: emptyBoard(),
         speed: 500,
@@ -64,16 +76,112 @@ app.get("/createCoopChannel", async (req, res) => {
       },
     }
   );
+
   res.json({ message: "Successfully Generated Lobby!", channelId: channelId });
 });
 
 //Create Versus Channel
+app.get("/createCoopChannel", async (req, res) => {
+  const channelId = createChannelId();
+  const channel = await hop.channels.create(
+    ChannelType.UNPROTECTED,
+    `${channelId}`,
+    // Creation Options
+    {
+      // Initial Channel state object
+      state: {
+        mode: 1,
+        playerOne: false,
+        playerTwo: false,
+        playerOneName: "",
+        playerTwoName: "",
+        playerOneId: "",
+        playerTwoId: "",
+        playerOneReady: false,
+        playerTwoReady: false,
+        gameStarted: false,
+        playerOneState: {
+          shapePos: -1, // pointers to show which type of shape we are using
+          rotatePos: 0, // pointer to represent which rotation of shape we are using
+          xPos: ROW_SIZE / 2, // postion of current shape in x direction
+          yPos: -3, // postion of variable in y direction
+          futureXPos: ROW_SIZE / 2,
+          futureYPos: -3,
+          board: emptyBoard(),
+          speed: 500,
+          score: 0,
+        },
+        playerTwoState: {
+          shapePos: -1, // pointers to show which type of shape we are using
+          rotatePos: 0, // pointer to represent which rotation of shape we are using
+          xPos: ROW_SIZE / 2, // postion of current shape in x direction
+          yPos: -3, // postion of variable in y direction
+          futureXPos: ROW_SIZE / 2,
+          futureYPos: -3,
+          board: emptyBoard(),
+          speed: 500,
+          score: 0,
+        },
+      },
+    }
+  );
+  const g = new VersusGame(channelId);
+  GAMES.set(channelId, g);
+  res.json({ message: "Successfully Generated Lobby!", channelId: channelId });
+});
+
+app.get("/joingame", (req, res) => {
+  const name = req.get(name);
+  const id = req.get(id);
+  const channelId = req.get(channelId);
+  const game = GAMES.get(channelId);
+  if (game) {
+    game.joinGame(name, id);
+  }
+  res.json({ message: "Successfully Joined Game!", channelId: channelId });
+});
+
+app.get("/keypress", (req, res) => {
+  const keyCode = req.get(keyCode);
+  const id = req.get(id);
+  const channelId = req.get(channelId);
+  const game = GAMES.get(channelId);
+  if (game) {
+    game.updateBoard(id, {
+      shapePos: DEFAULT_VALUE,
+      futurePos: DEFAULT_VALUE,
+    });
+
+    switch (keyCode) {
+      case LEFT:
+      case RIGHT:
+        game.shiftRight(id, keyCode === RIGHT);
+        break;
+      case ROTATE_UP:
+      case ROTATE_DOWN:
+        game.rotateClockwise(id, keyCode === ROTATE_UP);
+        break;
+      case DOWN:
+        // this.detectCollision();
+        game.shiftDown(id);
+        break;
+      case SPACE:
+        game.maxDown(id);
+        break;
+    }
+    game.updateBoard(id, {
+      shapePos: game.state.shapePos,
+      futurePos: -2,
+    });
+  }
+});
 
 app.get("/create", (req, res) => {
-  const id = req.get(id);
-  const name = req.get(name);
+  const id = req.get("id");
+  const name = req.get("name");
   res.json({
-    message: "Hello from Express! Your name is" + name + "and your id is" + id,
+    message:
+      "Hello from Express! Your name is " + name + " and your id is " + id,
   });
 });
 

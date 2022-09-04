@@ -51,6 +51,7 @@ export default function GameSelect(props) {
               Versus
             </Button>
           </Stack>
+          <Link to="/api">Check out our Api!</Link>
         </Stack>
       </Box>
     </>

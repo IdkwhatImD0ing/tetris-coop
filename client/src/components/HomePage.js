@@ -43,7 +43,7 @@ export default function Home(props) {
             handleSubmit={handleSubmit}
           />
 
-          <Link to="/api">Check out our Api!</Link>
+          
         </Stack>
       </Box>
     </>

@@ -1,6 +1,6 @@
-export const ROW_SIZE = 8;
-export const COL_SIZE = 20;
-export const DEFAULT_VALUE = -1;
+const ROW_SIZE = 8;
+const COL_SIZE = 20;
+const DEFAULT_VALUE = -1;
 
 const SHAPE = [
   /* --------------- */
@@ -115,16 +115,15 @@ const SHAPE = [
 ];
 
 // creates empty board
-export const emptyBoard = () =>
+const emptyBoard = () =>
   [...Array(ROW_SIZE * COL_SIZE)].map((_) => DEFAULT_VALUE);
 
 // Returns the shapewhich represents postion in the SHAPE array
 // If we get return value 1 then it reresents I
-export const getRandomShape = () =>
-  Math.round((SHAPE.length - 1) * Math.random());
+const getRandomShape = () => Math.round((SHAPE.length - 1) * Math.random());
 
 // Returns 2D array that represents the current shape with the accurate position
-export const getShape = ({ shapePos, rotatePos, xPos, yPos }) =>
+const getShape = ({ shapePos, rotatePos, xPos, yPos }) =>
   SHAPE[shapePos][rotatePos].map((row, rowPos) =>
     row.map((col, colPos) =>
       col ? xPos + colPos + ROW_SIZE * (rowPos + yPos) : DEFAULT_VALUE
@@ -132,12 +131,7 @@ export const getShape = ({ shapePos, rotatePos, xPos, yPos }) =>
   );
 
 // Returns the 2D array that represents the future shape with accurate position
-export const getFutureShape = ({
-  shapePos,
-  rotatePos,
-  futureXPos,
-  futureYPos,
-}) =>
+const getFutureShape = ({ shapePos, rotatePos, futureXPos, futureYPos }) =>
   SHAPE[shapePos][rotatePos].map((row, rowPos) =>
     row.map((col, colPos) =>
       col
@@ -147,7 +141,7 @@ export const getFutureShape = ({
   );
 
 //  updatest the rotate pos that represents the roatation for given shape
-export const rotateShape = (isClockwise, { shapePos, rotatePos }) =>
+const rotateShape = (isClockwise, { shapePos, rotatePos }) =>
   isClockwise
     ? rotatePos === 0
       ? SHAPE[shapePos].length - 1
@@ -156,7 +150,7 @@ export const rotateShape = (isClockwise, { shapePos, rotatePos }) =>
     ? 0
     : rotatePos + 1;
 
-export const InitialState = () => {
+const InitialState = () => {
   return {
     shapePos: getRandomShape(), // pointers to show which type of shape we are using
     rotatePos: 0, // pointer to represent which rotation of shape we are using
@@ -168,4 +162,13 @@ export const InitialState = () => {
     speed: 500,
     score: 0,
   };
+};
+
+module.exports = {
+  InitialState,
+  getShape,
+  getFutureShape,
+  rotateShape,
+  getRandomShape,
+  emptyBoard,
 };

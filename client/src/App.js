@@ -6,11 +6,13 @@ import Single from "./modes/Single";
 import { useState } from "react";
 import Home from "./components/HomePage";
 import GameSelect from "./components/GameSelect";
+import Lobby from "./components/Lobby";
 import { hop } from "@onehop/client";
 import CoopGame from "./modes/Coop";
+import VersusGame from "./modes/Versus";
 
 hop.init({
-  projectId: process.env.HOP_PROJECT_ID, // replace with your project ID
+  projectId: process.env.REACT_APP_HOP_PROJECT_ID, // replace with your project ID
 });
 
 export default function App() {
@@ -45,8 +47,12 @@ export default function App() {
           path="/lobby"
           element={<Lobby name={name} playerId={id} mode={mode} />}
         />
-        <Route path="/CoopGame" element={<CoopGame />} />
-        <Route path="/api" element={<Api />} />
+        <Route path="/coop" element={<CoopGame />} />
+        <Route
+          path="/versus"
+          element={<VersusGame name={name} playerId={id} />}
+        />
+        <Route path="/api" element={<Api id={id} name={name} />} />
         <Route path="/single" element={<Single />} />
       </Routes>
     </div>

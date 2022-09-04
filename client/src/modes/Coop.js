@@ -1,7 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Link, useLocation } from "react-router-dom";
 import { hop } from "@onehop/client";
-require("dotenv").config();
 
 hop.init({ projectId: process.env.REACT_APP_HOP_PROJECT_ID });
 

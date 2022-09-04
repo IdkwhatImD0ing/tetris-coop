@@ -1,12 +1,17 @@
 require("dotenv").config();
 const { Hop, ChannelType } = require("@onehop/js");
-const hop = new Hop(process.env.HOP_PROJECT_ENV);
+const hop = new Hop(process.env.REACT_APP_HOP_PROJECT_ENV);
 
-import { COL_SIZE, ROW_SIZE } from "./components/shape";
-import * as s from "./components/shape";
-import Square from "./components/square";
+const {
+  getShape,
+  getFutureShape,
+  rotateShape,
+  getRandomShape,
+} = require("./components/shape");
 
-class Game {
+const increaseSpeed = ({ speed }) => speed - 10 * (speed > 10);
+
+class VersusGame {
   constructor(channelId) {
     this.channelId = channelId;
     this.state = getState();
@@ -17,32 +22,42 @@ class Game {
     return await hop.channels.get(this.channelId);
   }
 
-  joinGame(playerId) {
+  joinGame(name, playerId) {
     if (!this.state.playerOne) {
-      this.state[playerId] = "playerOne";
+      this.state[playerId] = "playerOneState";
+      this.state.playerOne = true;
+      this.state.playerOneName = name;
+      this.state.playerOneId = playerId;
     } else if (!this.state.playerTwo) {
-      this.state[playerId] = "playerTwo";
+      this.state[playerId] = "playerTwoState";
+      this.state.playerTwo = true;
+      this.state.playerTwoName = name;
+      this.state.playerTwoId = playerId;
     }
-    S;
   }
 
   startGame() {
     this.started = true;
     this.state.gameStarted = true;
+    this.state[this.state.playerOneId].shapePos = s.randomShape();
+    this.state[this.state.playerTwoId].shapePos = s.randomShape();
     this.periodicInterval = setInterval(() => {
-      this.updateBoard({
+      this.updateBoard(playerId, {
         shapePos: s.DEFAULT_VALUE,
         futurePos: -2,
       });
       this.shiftDown();
-      this.updateBoard({ shapePos: this.state.shapePos, futurePos: -2 });
+      this.updateBoard(playerId, {
+        shapePos: this.state.shapePos,
+        futurePos: -2,
+      });
     }, this.state.speed);
   }
 
   // Shifting
   shiftRight = (playerId, isRight) => {
     let state = this.state[this.state[playerId]];
-    let curShape = s.getShape(state);
+    let curShape = getShape(state);
     let { deltaX, func, isEdge } = isRight
       ? {
           deltaX: 1,
@@ -59,14 +74,16 @@ class Game {
       return;
     }
 
-    //TODO: fix this
-    /*
     if (state.yPos < 0) {
-      this.setState({ xPos: this.state.xPos + deltaX });
-      this.futurePosition();
+      state.xPos = state.xPos + deltaX;
+      this.state[this.state[playerId]] = state;
+      hop.channels.setState(this.channelId, (s) => ({
+        ...s,
+        [this.state[playerId]]: state,
+      }));
+      this.futurePosition(playerId);
       return;
     }
-    */
 
     //Making sure we are not overlaping other shape
     let isConflict = false;
@@ -82,23 +99,24 @@ class Game {
       }
     });
 
-    // Shifting if there is not conflict
-    //TODO: fix this
-    /*
     if (!isConflict) {
-      this.setState({ xPos: this.state.xPos + deltaX });
+      state.xPos = state.xPos + deltaX;
+      this.state[this.state[playerId]] = state;
+      hop.channels.setState(this.channelId, (s) => ({
+        ...s,
+        [this.state[playerId]]: state,
+      }));
       this.futurePosition();
     }
-    */
   };
 
   // Rotate
   rotateClockwise = (playerId, isClockwise) => {
     let state = this.state[this.state[playerId]];
-    let oldShape = s.getShape(state);
+    let oldShape = getShape(state);
     let newState = { ...state };
-    newState.rotatePos = s.rotateShape(isClockwise, state);
-    let newShape = s.getShape(newState);
+    newState.rotatePos = rotateShape(isClockwise, state);
+    let newShape = getShape(newState);
 
     let isConflict = false;
     newShape.forEach((newArray) => {
@@ -126,26 +144,21 @@ class Game {
       }
     });
 
-    //TODO: fix this
-    /*
     if (!isConflict) {
-      this.setState({ rotatePos: newState.rotatePos });
+      state.rotatePos = newState.rotatePos;
+      this.state[this.state[playerId]] = state;
+      hop.channels.setState(this.channelId, (s) => ({
+        ...s,
+        [this.state[playerId]]: state,
+      }));
       this.futurePosition();
     }
-    */
   };
 
   getNextBlock = debounce((playerId) => {
     let state = this.state[this.state[playerId]];
     let isFilled = false;
-    let curShape = s.getShape(state);
-    //fix this later
-    /*
-    this.updateBoard({
-      shapePos: this.state.shapePos,
-      futurePos: -2,
-    });
-    */
+    let curShape = getShape(state);
     for (let i = 0; i < curShape.length; i++) {
       // getting the row that the shape is touching
       let row = [...Array(ROW_SIZE)].map(
@@ -174,25 +187,26 @@ class Game {
         this.state.board = board;
       }
     }
-    //TODO: fix this
-    /*
-    this.setState({
-      shapePos: s.getRandomShape(),
-      speed: increaseSpeed(this.state),
-      yPos: -3,
-      xPos: ROW_SIZE / 2,
-      futureXPos: ROW_SIZE / 2,
-      futureYPos: -3,
-      rotatePos: 0,
-    });
-    console.log("Calling Future");
+
+    state.shapePos = getRandomShape();
+    state.speed = increaseSpeed(state.speed);
+    state.yPos = -3;
+    state.xPos = ROW_SIZE / 2;
+    state.futureYPos = -3;
+    state.futureXPos = ROW_SIZE / 2;
+    state.rotatePos = 0;
+    this.state[this.state[playerId]] = state;
+    hop.channels.setState(this.channelId, (s) => ({
+      ...s,
+      [this.state[playerId]]: state,
+    }));
+
     this.futurePosition();
-    */
   }, 100);
 
   shiftDown = (playerId) => {
     let state = this.state[this.state[playerId]];
-    let curShape = s.getShape(state);
+    let curShape = getShape(state);
     // Checking if bottom of the board is touched
     if (state.yPos + curShape.length >= COL_SIZE) {
       console.log("next block");
@@ -230,10 +244,22 @@ class Game {
     if (flag) {
       return;
     }
-    //TODO: fix this
-    /*
-    this.setState({ yPos: this.state.yPos + 1 });
-    */
+    state.yPos = state.yPos + 1;
+    this.state[this.state[playerId]] = state;
+    hop.channels.setState(this.channelId, (s) => ({
+      ...s,
+      [this.state[playerId]]: state,
+    }));
+  };
+
+  maxDown = (playerId) => {
+    state = this.state[this.state[playerId]];
+    state.yPos = state.futureYPos;
+    this.state[this.state[playerId]] = state;
+    hop.channels.setState(this.channelId, (s) => ({
+      ...s,
+      [this.state[playerId]]: state,
+    }));
   };
 
   futurePosition = (playerId) => {
@@ -249,8 +275,13 @@ class Game {
 
     while (x < COL_SIZE + 3) {
       //console.log("Loop");
-      let curShape = s.getFutureShape(state);
+      let curShape = getFutureShape(state);
       if (state.futureYPos + curShape.length >= COL_SIZE) {
+        this.state[this.state[playerId]] = state;
+        hop.channels.setState(this.channelId, (s) => ({
+          ...s,
+          [this.state[playerId]]: state,
+        }));
         return;
       }
 
@@ -272,46 +303,60 @@ class Game {
       });
 
       if (flag === false) {
+        this.state[this.state[playerId]] = state;
+        hop.channels.setState(this.channelId, (s) => ({
+          ...s,
+          [this.state[playerId]]: state,
+        }));
         return;
       }
-      //TODO: fix this
-      /*
-      this.setState({ futureYPos: this.state.futureYPos + 1 });
       x++;
-        */
+      state.futureYPos = state.futureYPos + 1;
     }
+    this.state[this.state[playerId]] = state;
+    hop.channels.setState(this.channelId, (s) => ({
+      ...s,
+      [this.state[playerId]]: state,
+    }));
   };
 
   // Updates the Board for both users, not meant to be shown
-  updateBoard = () => {
-    let board = [...this.state.board];
-    let state = this.state[playerOne];
-    let stateTwo = this.state[playerTwo];
+  updateBoard = (playerId, { shapePos, futurePos }) => {
+    let state = this.state[this.state[playerId]];
+    let board = [...state.board];
 
-    let curShape = s.getShape(state);
+    let futureShape = getFutureShape(state);
+    futureShape.forEach((row) =>
+      row.forEach((pos) => {
+        if (pos !== s.DEFAULT_VALUE) {
+          board[pos] = futurePos;
+        }
+      })
+    );
+
+    let curShape = getShape(state);
     curShape.forEach((row) =>
       row.forEach((pos) => {
         if (pos !== s.DEFAULT_VALUE) {
-          board[pos] = state.shapePos;
+          board[pos] = shapePos;
         }
       })
     );
 
-    let curShapeTwo = s.getShape(stateTwo);
-    curShapeTwo.forEach((row) =>
-      row.forEach((pos) => {
-        if (pos !== s.DEFAULT_VALUE) {
-          board[pos] = stateTwo.shapePos;
-        }
-      })
-    );
-
-    this.state.board = board;
+    state.board = board;
+    this.state[this.state[playerId]] = state;
+    hop.channels.setState(this.channelId, (s) => ({
+      ...s,
+      [this.state[playerId]]: state,
+    }));
   };
 
   keyInput = (playerId, { keyCode }) => {
     // clearing the board
-    this.updateBoard({ shapePos: s.DEFAULT_VALUE, futurePos: s.DEFAULT_VALUE });
+    this.updateBoard(playerId, {
+      shapePos: s.DEFAULT_VALUE,
+      futurePos: s.DEFAULT_VALUE,
+    });
 
     switch (keyCode) {
       case LEFT:
@@ -332,9 +377,11 @@ class Game {
         this.state[this.state[playerId]] = state;
         break;
     }
-    this.updateBoard({
+    this.updateBoard(playerId, {
       shapePos: this.state.shapePos,
       futurePos: -2,
     });
   };
 }
+
+module.exports = { VersusGame };
