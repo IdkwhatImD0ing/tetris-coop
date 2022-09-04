@@ -95,6 +95,7 @@ class VersusGame {
         shapePos: this.state[this.state[this.state.playerTwoId]].shapePos,
         futurePos: -2,
       });
+      this.refreshBoard(this.state.playerOneId);
     }, this.state.speed);
   }
 
@@ -386,6 +387,9 @@ class VersusGame {
     );
 
     state.board = board;
+  };
+
+  refreshBoard = (playerId) => {
     this.state[this.state[playerId]] = state;
     hop.channels.patchState(this.channelId, {
       [this.state[playerId]]: state,
