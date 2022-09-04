@@ -48,7 +48,7 @@ class VersusGame {
     }
   }
 
-  async ready(playerId) {
+  ready(playerId) {
     if (this.started) {
       return;
     }
@@ -67,7 +67,7 @@ class VersusGame {
     }
   }
 
-  async startGame() {
+  startGame() {
     console.log("gameStarted");
     this.started = true;
     this.state.gameStarted = true;
@@ -95,10 +95,12 @@ class VersusGame {
         shapePos: this.state[this.state[this.state.playerTwoId]].shapePos,
         futurePos: -2,
       });
+      this.renderBoard(this.state.playerOneId);
+      this.renderBoard(this.state.playerTwoId);
     }, this.state.speed);
   }
 
-  async endGame() {
+  endGame() {
     console.log("gameeEnded");
     this.started = false;
     this.state.gameStarted = false;
@@ -108,7 +110,7 @@ class VersusGame {
   }
 
   // Shifting
-  shiftRight = async (playerId, isRight) => {
+  shiftRight = (playerId, isRight) => {
     let state = this.state[this.state[playerId]];
     let curShape = getShape(state);
     let { deltaX, func, isEdge } = isRight
@@ -130,9 +132,6 @@ class VersusGame {
     if (state.yPos < 0) {
       state.xPos = state.xPos + deltaX;
       this.state[this.state[playerId]] = state;
-      hop.channels.patchState(this.channelId, {
-        [this.state[playerId]]: state,
-      });
       this.futurePosition(playerId);
       return;
     }
@@ -154,15 +153,12 @@ class VersusGame {
     if (!isConflict) {
       state.xPos = state.xPos + deltaX;
       this.state[this.state[playerId]] = state;
-      hop.channels.patchState(this.channelId, {
-        [this.state[playerId]]: state,
-      });
       this.futurePosition(playerId);
     }
   };
 
   // Rotate
-  rotateClockwise = async (playerId, isClockwise) => {
+  rotateClockwise = (playerId, isClockwise) => {
     let state = this.state[this.state[playerId]];
     let oldShape = getShape(state);
     let newState = { ...state };
@@ -198,14 +194,11 @@ class VersusGame {
     if (!isConflict) {
       state.rotatePos = newState.rotatePos;
       this.state[this.state[playerId]] = state;
-      hop.channels.patchState(this.channelId, {
-        [this.state[playerId]]: state,
-      });
       this.futurePosition(playerId);
     }
   };
 
-  getNextBlock = debounce(async (playerId) => {
+  getNextBlock = debounce((playerId) => {
     let state = this.state[this.state[playerId]];
     let isFilled = false;
     let curShape = getShape(state);
@@ -223,9 +216,6 @@ class VersusGame {
           .filter((val) => val >= 0).length === ROW_SIZE;
       if (isFilled) {
         state.score += 1;
-        hop.channels.patchState(this.channelId, {
-          [this.state[playerId].score]: state.score,
-        });
         isFilled = false;
         let board = [...state.board];
         // clearing the row
@@ -249,15 +239,10 @@ class VersusGame {
     state.futureXPos = ROW_SIZE / 2;
     state.rotatePos = 0;
     this.state[this.state[playerId]] = state;
-    hop.channels.patchState(this.channelId, {
-      [this.state[playerId]]: state,
-      speed: this.state.speed,
-    });
-
     this.futurePosition(playerId);
   }, 100);
 
-  shiftDown = async (playerId) => {
+  shiftDown = (playerId) => {
     let state = this.state[this.state[playerId]];
     let curShape = getShape(state);
     // Checking if bottom of the board is touched
@@ -267,7 +252,7 @@ class VersusGame {
     }
     let flag = false;
     // checking that there is no conflict
-    curShape[0].forEach(async (_, pos) => {
+    curShape[0].forEach((_, pos) => {
       let newArray = curShape.map((row) =>
         row[pos] === DEFAULT_VALUE ? -1 : row[pos] + ROW_SIZE
       );
@@ -296,21 +281,15 @@ class VersusGame {
     }
     state.yPos = state.yPos + 1;
     this.state[this.state[playerId]] = state;
-    hop.channels.patchState(this.channelId, {
-      [this.state[playerId]]: state,
-    });
   };
 
-  maxDown = async (playerId) => {
+  maxDown = (playerId) => {
     let state = this.state[this.state[playerId]];
     state.yPos = state.futureYPos;
     this.state[this.state[playerId]] = state;
-    hop.channels.patchState(this.channelId, {
-      [this.state[playerId]]: state,
-    });
   };
 
-  futurePosition = async (playerId) => {
+  futurePosition = (playerId) => {
     let state = this.state[this.state[playerId]];
     //Starts from the current block position
     state.futureXPos = state.xPos;
@@ -323,9 +302,6 @@ class VersusGame {
       let curShape = getFutureShape(state);
       if (state.futureYPos + curShape.length >= COL_SIZE) {
         this.state[this.state[playerId]] = state;
-        hop.channels.patchState(this.channelId, {
-          [this.state[playerId]]: state,
-        });
         return;
       }
 
@@ -348,22 +324,16 @@ class VersusGame {
 
       if (flag === false) {
         this.state[this.state[playerId]] = state;
-        hop.channels.patchState(this.channelId, {
-          [this.state[playerId]]: state,
-        });
         return;
       }
       x++;
       state.futureYPos = state.futureYPos + 1;
     }
     this.state[this.state[playerId]] = state;
-    hop.channels.patchState(this.channelId, {
-      [this.state[playerId]]: state,
-    });
   };
 
   // Updates the Board for both users, not meant to be shown
-  updateBoard = async (playerId, { shapePos, futurePos }) => {
+  updateBoard = (playerId, { shapePos, futurePos }) => {
     let state = this.state[this.state[playerId]];
     let board = state.board;
 
@@ -387,8 +357,11 @@ class VersusGame {
 
     state.board = board;
     this.state[this.state[playerId]] = state;
+  };
+
+  renderBoard = (playerId) => {
     hop.channels.patchState(this.channelId, {
-      [this.state[playerId]]: state,
+      [this.state[playerId]]: this.state[this.state[playerId]],
     });
   };
 }
