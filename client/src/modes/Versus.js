@@ -1,18 +1,21 @@
 import React, { useEffect } from "react";
-import { BrowserRouter as Router, Link, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Link,
+  useLocation,
+  useSearchParams,
+} from "react-router-dom";
 import { hop } from "@onehop/client";
-import { Box, Stack, Typography, Button } from "@mui/material";
+import {
+  Box,
+  Stack,
+  Typography,
+  Button,
+  CircularProgress,
+} from "@mui/material";
 import { useReadChannelState } from "@onehop/react";
 import { COL_SIZE, ROW_SIZE } from "../components/shape";
 import Home from "../components/HomePage";
-
-hop.init({ projectId: process.env.REACT_APP_HOP_PROJECT_ID });
-
-function useQuery() {
-  const { search } = useLocation();
-
-  return React.useMemo(() => new URLSearchParams(search), [search]);
-}
 
 const style = {
   width: "250px",
@@ -24,14 +27,15 @@ const style = {
 };
 
 export default function VersusGame(props) {
-  let query = useQuery();
-  const channelId = query.get("channelId");
+  const [params] = useSearchParams();
+  //console.log(params.get("channelId"));
+  const channelId = params.get("channelId");
+
   const { state } = useReadChannelState(channelId);
   const [name, setName] = React.useState(props.name);
   const [playerId, setPlayerId] = React.useState(props.playerId);
 
   useEffect(async () => {
-    state = await hop.channels.readState(channelId);
     if (name) {
       fetch("/joingame", {
         headers: { name: name, id: playerId, channelId, channelId },
@@ -65,6 +69,28 @@ export default function VersusGame(props) {
       headers: { keyCode: keyCode, id: playerId, channelId: channelId },
     }).then((res) => res.json());
   };
+  if (!state) {
+    return (
+      <>
+        <Box
+          component="section"
+          sx={{
+            display: "flex",
+            backgroundColor: "Grey",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100vh",
+          }}
+        >
+          <Stack direction="column" spacing={4} alignItems="center">
+            <Typography variant="h2">Loading...</Typography>
+            <CircularProgress sx={{ color: "black" }} />
+          </Stack>
+        </Box>
+      </>
+    );
+  }
 
   return (
     <>

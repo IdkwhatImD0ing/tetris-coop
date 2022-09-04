@@ -4,7 +4,7 @@ const express = require("express");
 const PORT = process.env.PORT || 3001;
 const app = express();
 const hop = new Hop(process.env.REACT_APP_HOP_PROJECT_ENV);
-const VersusGame = require("./versusgame");
+const { VersusGame } = require("./versusgame");
 
 const ROW_SIZE = 8;
 const COL_SIZE = 20;
@@ -84,54 +84,56 @@ app.get("/createCoopChannel", async (req, res) => {
 app.get("/createVersusChannel", async (req, res) => {
   const channelId = createChannelId();
   console.log("Creating Versus Channel: " + channelId);
+  const state = {
+    mode: 1,
+    playerOne: false,
+    playerTwo: false,
+    playerOneName: "",
+    playerTwoName: "",
+    playerOneId: "",
+    playerTwoId: "",
+    playerOneReady: false,
+    playerTwoReady: false,
+    gameStarted: false,
+    playerOneState: {
+      shapePos: -1, // pointers to show which type of shape we are using
+      rotatePos: 0, // pointer to represent which rotation of shape we are using
+      xPos: ROW_SIZE / 2, // postion of current shape in x direction
+      yPos: -3, // postion of variable in y direction
+      futureXPos: ROW_SIZE / 2,
+      futureYPos: -3,
+      board: emptyBoard(),
+      speed: 500,
+      score: 0,
+    },
+    playerTwoState: {
+      shapePos: -1, // pointers to show which type of shape we are using
+      rotatePos: 0, // pointer to represent which rotation of shape we are using
+      xPos: ROW_SIZE / 2, // postion of current shape in x direction
+      yPos: -3, // postion of variable in y direction
+      futureXPos: ROW_SIZE / 2,
+      futureYPos: -3,
+      board: emptyBoard(),
+      speed: 500,
+      score: 0,
+    },
+  };
   const channel = await hop.channels.create(
     ChannelType.UNPROTECTED,
     `${channelId}`,
     // Creation Options
     {
-      // Initial Channel state object
-      state: {
-        mode: 1,
-        playerOne: false,
-        playerTwo: false,
-        playerOneName: "",
-        playerTwoName: "",
-        playerOneId: "",
-        playerTwoId: "",
-        playerOneReady: false,
-        playerTwoReady: false,
-        gameStarted: false,
-        playerOneState: {
-          shapePos: -1, // pointers to show which type of shape we are using
-          rotatePos: 0, // pointer to represent which rotation of shape we are using
-          xPos: ROW_SIZE / 2, // postion of current shape in x direction
-          yPos: -3, // postion of variable in y direction
-          futureXPos: ROW_SIZE / 2,
-          futureYPos: -3,
-          board: emptyBoard(),
-          speed: 500,
-          score: 0,
-        },
-        playerTwoState: {
-          shapePos: -1, // pointers to show which type of shape we are using
-          rotatePos: 0, // pointer to represent which rotation of shape we are using
-          xPos: ROW_SIZE / 2, // postion of current shape in x direction
-          yPos: -3, // postion of variable in y direction
-          futureXPos: ROW_SIZE / 2,
-          futureYPos: -3,
-          board: emptyBoard(),
-          speed: 500,
-          score: 0,
-        },
-      },
+      state: state, // Initial Channel state object
     }
   );
   const g = new VersusGame(channelId);
   GAMES.set(channelId, g);
+  console.log("Created Versus Channel: " + channelId);
   res.json({ message: "Successfully Generated Lobby!", channelId: channelId });
 });
 
 app.get("/joingame", (req, res) => {
+  console.log("joining game");
   const name = req.get("name");
   const id = req.get("id");
   const channelId = req.get("channelId");
@@ -143,6 +145,7 @@ app.get("/joingame", (req, res) => {
 });
 
 app.get("/ready", (req, res) => {
+  console.log("ready");
   const id = req.get("id");
   const channelId = req.get("channelId");
   const game = GAMES.get("channelId");
@@ -189,6 +192,7 @@ app.get("/keypress", (req, res) => {
 });
 
 app.get("/create", (req, res) => {
+  console.log("in create");
   const id = req.get("id");
   const name = req.get("name");
   res.json({

@@ -13,25 +13,26 @@ export default function Lobby(props) {
   const name = props.name;
   const navigate = useNavigate();
   const id = props.playerId;
-  const [loading, setLoading] = React.useState(true);
-  const [channelId, setChannelId] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
 
-  const createCoopChannel = async () => {
+  const createCoopChannel = () => {
     setLoading(true);
     fetch("/createCoopChannel")
       .then((res) => res.json())
-      .then((data) => setChannelId(data.channelId));
-    setLoading(false);
-    navigate(`/coop?channelId=${channelId}`);
+      .then((data) => {
+        setLoading(false);
+        navigate(`/coop?channelId=${data.channelId}`);
+      });
   };
 
-  const createVersusChannel = async () => {
+  const createVersusChannel = () => {
     setLoading(true);
     fetch("/createVersusChannel")
       .then((res) => res.json())
-      .then((data) => setChannelId(data.channelId));
-    setLoading(false);
-    navigate(`/versus?channelId=${channelId}`);
+      .then((data) => {
+        setLoading(false);
+        navigate(`/versus?channelId=${data.channelId}`);
+      });
   };
 
   if (loading) {
@@ -71,6 +72,7 @@ export default function Lobby(props) {
         }}
       >
         <Button
+          variant="contained"
           onClick={() => {
             if (mode === 0) {
               createCoopChannel();
@@ -79,6 +81,7 @@ export default function Lobby(props) {
               createVersusChannel();
             }
           }}
+          sx={{ color: "white", backgroundColor: "black" }}
         >
           Create Room
         </Button>

@@ -8,18 +8,15 @@ const {
   rotateShape,
   getRandomShape,
 } = require("./components/shape");
+const debounce = require("lodash.debounce");
 
 const increaseSpeed = ({ speed }) => speed - 10 * (speed > 10);
 
 class VersusGame {
-  constructor(channelId) {
+  constructor(channelId, state) {
     this.channelId = channelId;
-    this.state = getState();
+    this.state = state;
     this.started = false;
-  }
-
-  async getState() {
-    return await hop.channels.get(this.channelId);
   }
 
   joinGame(name, playerId) {
