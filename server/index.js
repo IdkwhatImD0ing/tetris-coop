@@ -162,6 +162,9 @@ app.get("/keypress", (req, res) => {
   const name = req.get("name");
   const channelId = req.get("channelId");
   const game = GAMES.get(channelId);
+  if (game.state.playerOneName !== name && game.state.playerTwoName !== name) {
+    return;
+  }
   if (game) {
     game.updateBoard(id, {
       shapePos: DEFAULT_VALUE,
