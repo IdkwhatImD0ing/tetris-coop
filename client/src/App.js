@@ -12,7 +12,7 @@ import CoopGame from "./modes/Coop";
 import VersusGame from "./modes/Versus";
 
 hop.init({
-  projectId: process.env.REACT_APP_HOP_PROJECT_ID, // replace with your project ID
+  projectId: "project_NDgzMzYyMjc0NjEwMTM2MTM", // replace with your project ID
 });
 
 export default function App() {

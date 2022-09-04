@@ -42,8 +42,6 @@ export default function Home(props) {
             handleChange={handleChange}
             handleSubmit={handleSubmit}
           />
-
-          
         </Stack>
       </Box>
     </>

@@ -95,6 +95,7 @@ app.get("/createVersusChannel", async (req, res) => {
     playerOneReady: false,
     playerTwoReady: false,
     gameStarted: false,
+    speed: 500,
     playerOneState: {
       shapePos: -1, // pointers to show which type of shape we are using
       rotatePos: 0, // pointer to represent which rotation of shape we are using
@@ -103,7 +104,7 @@ app.get("/createVersusChannel", async (req, res) => {
       futureXPos: ROW_SIZE / 2,
       futureYPos: -3,
       board: emptyBoard(),
-      speed: 500,
+
       score: 0,
     },
     playerTwoState: {
@@ -114,7 +115,6 @@ app.get("/createVersusChannel", async (req, res) => {
       futureXPos: ROW_SIZE / 2,
       futureYPos: -3,
       board: emptyBoard(),
-      speed: 500,
       score: 0,
     },
   };
@@ -126,9 +126,8 @@ app.get("/createVersusChannel", async (req, res) => {
       state: state, // Initial Channel state object
     }
   );
-  const g = new VersusGame(channelId);
+  const g = new VersusGame(channelId, state);
   GAMES.set(channelId, g);
-  console.log("Created Versus Channel: " + channelId);
   res.json({ message: "Successfully Generated Lobby!", channelId: channelId });
 });
 
@@ -136,8 +135,9 @@ app.get("/joingame", (req, res) => {
   console.log("joining game");
   const name = req.get("name");
   const id = req.get("id");
+  console.log(id);
   const channelId = req.get("channelId");
-  const game = GAMES.get("channelId");
+  const game = GAMES.get(channelId);
   if (game) {
     game.joinGame(name, id);
   }
@@ -147,8 +147,9 @@ app.get("/joingame", (req, res) => {
 app.get("/ready", (req, res) => {
   console.log("ready");
   const id = req.get("id");
+  console.log(id);
   const channelId = req.get("channelId");
-  const game = GAMES.get("channelId");
+  const game = GAMES.get(channelId);
   if (game) {
     game.ready(id);
   }

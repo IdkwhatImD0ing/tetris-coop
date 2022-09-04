@@ -1,11 +1,5 @@
 import React, { useEffect } from "react";
-import {
-  BrowserRouter as Router,
-  Link,
-  useLocation,
-  useSearchParams,
-} from "react-router-dom";
-import { hop } from "@onehop/client";
+import { useSearchParams } from "react-router-dom";
 import {
   Box,
   Stack,
@@ -16,6 +10,7 @@ import {
 import { useReadChannelState } from "@onehop/react";
 import { COL_SIZE, ROW_SIZE } from "../components/shape";
 import Home from "../components/HomePage";
+import Square from "../components/square";
 
 const style = {
   width: "250px",
@@ -35,40 +30,42 @@ export default function VersusGame(props) {
   const [name, setName] = React.useState(props.name);
   const [playerId, setPlayerId] = React.useState(props.playerId);
 
-  useEffect(async () => {
+  useEffect(() => {
     if (name) {
       fetch("/joingame", {
-        headers: { name: name, id: playerId, channelId, channelId },
+        headers: { name: name, id: playerId, channelId: channelId },
       }).then((res) => res.json());
     }
     document.onkeydown = keyInput;
   }, []);
 
-  function createID() {
-    let id =
+  function createName(name) {
+    setName(name);
+    let temp =
       Date.now().toString(36) +
       Math.floor(
         Math.pow(10, 12) + Math.random() * 9 * Math.pow(10, 12)
       ).toString(36);
-    setPlayerId(id);
-  }
-
-  function createName(name) {
-    setName(name);
-    createID();
+    setPlayerId(temp);
+    fetch("/joingame", {
+      headers: { name: name, id: temp, channelId: channelId },
+    }).then((res) => res.json());
   }
 
   function onclick() {
     fetch("/ready", {
-      headers: { name: name, id: playerId, channelId, channelId },
+      headers: { name: name, id: playerId, channelId: channelId },
     }).then((res) => res.json());
   }
 
   const keyInput = ({ keyCode }) => {
-    fetch("/keypress", {
-      headers: { keyCode: keyCode, id: playerId, channelId: channelId },
-    }).then((res) => res.json());
+    if (state.gameStarted) {
+      fetch("/keypress", {
+        headers: { keyCode: keyCode, id: playerId, channelId: channelId },
+      }).then((res) => res.json());
+    }
   };
+
   if (!state) {
     return (
       <>
@@ -92,74 +89,90 @@ export default function VersusGame(props) {
     );
   }
 
+  if (!name) {
+    return <Home setName={createName} />;
+  }
+
   return (
     <>
-      {!name && <Home setName={createName} />}
-      {name && (
-        <Box
-          component="section"
-          sx={{
-            display: "flex",
-            backgroundColor: "Grey",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            height: "100vh",
-          }}
+      <Box
+        component="section"
+        sx={{
+          backgroundColor: "Grey",
+          height: "100vh",
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent="space-around"
+          alignItems="center"
+          spacing={5}
         >
           <Stack
-            direction="row"
-            justifyContent="space-around"
+            drection="column"
+            justifyContent="center"
             alignItems="center"
-            spacing={5}
+            spacing={3}
           >
+            <Typography variant="h2">{state.playerOneName}</Typography>
+            {state[state[state.playerOneId]] && (
+              <Typography variant="h2">
+                Score: {state[state[state.playerOneId]].score}
+              </Typography>
+            )}
+
+            <Button
+              variant="contained"
+              onClick={onclick}
+              sx={{ backgroundColor: state.playerOneReady ? "green" : "red" }}
+            >
+              Ready
+            </Button>
+          </Stack>
+          {state.playerOneReady && state.playerTwoReady && (
+            <Stack
+              direction="row"
+              spacing={10}
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <div style={style}>
+                {state[state[state.playerOneId]].board.map((val, pos) => (
+                  <Square key={pos} name={pos} color={val} />
+                ))}
+              </div>
+              <div />
+              <div style={style}>
+                {state[state[state.playerTwoId]].board.map((val, pos) => (
+                  <Square key={pos} name={pos} color={val} />
+                ))}
+              </div>
+            </Stack>
+          )}
+          {state.playerTwo && (
             <Stack
               drection="column"
-              justifyCOntent="center"
+              justifyContent="center"
               alignItems="center"
               spacing={3}
             >
-              <Typography variant="h2">{state.playerOneName}!</Typography>
-              <Typography variant="h2">
-                {state[state.playerOneId].score}!
-              </Typography>
+              <Typography variant="h2">{state.playerTwoName}</Typography>
+              {state[state[state.playerTwoId]] && (
+                <Typography variant="h2">
+                  Score: {state[state[state.playerTwoId]].score}
+                </Typography>
+              )}
               <Button
                 variant="contained"
-                color={state.playerOneReady ? "green" : "red"}
                 onClick={onclick}
+                sx={{ backgroundColor: state.playerTwoReady ? "green" : "red" }}
               >
                 Ready
               </Button>
             </Stack>
-            {state.playerOneReady && state.playerTwoReady && (
-              <>
-                <div style={style}> {state[state.playerOneId].board} </div>
-                <div style={style}> {state[state.playerTwoId].board} </div>
-              </>
-            )}
-            {state.playerTwo && (
-              <Stack
-                drection="column"
-                justifyCOntent="center"
-                alignItems="center"
-                spacing={3}
-              >
-                <Typography variant="h2">{state.playerOneName}!</Typography>
-                <Typography variant="h2">
-                  {state[state.playerOneId].score}!
-                </Typography>
-                <Button
-                  variant="contained"
-                  color={state.playerTwoReady ? "green" : "red"}
-                  onClick={onclick}
-                >
-                  Ready
-                </Button>
-              </Stack>
-            )}
-          </Stack>
-        </Box>
-      )}
+          )}
+        </Stack>
+      </Box>
     </>
   );
 }

@@ -323,12 +323,12 @@ class Single extends Component {
       <Square key={pos} name={pos} color={val} />
     ));
     return (
-      <div className="App">
+      <>
         <h1> Tetris </h1>
         <h2> Points: {this.state.score}</h2>
         <p> Controls: Right | Left | Down | Z | X | Space </p>
         <div style={style}> {board} </div>
-      </div>
+      </>
     );
   }
 }

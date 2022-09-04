@@ -25,7 +25,7 @@ export default function GameSelect(props) {
           <Typography variant="h2">Hello {props.name}!</Typography>
           <Stack
             direction="row"
-            justifyCOntent="center"
+            justifyContent="center"
             alignItems="center"
             spacing={2}
           >

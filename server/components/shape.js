@@ -165,6 +165,9 @@ const InitialState = () => {
 };
 
 module.exports = {
+  ROW_SIZE,
+  COL_SIZE,
+  DEFAULT_VALUE,
   InitialState,
   getShape,
   getFutureShape,
