@@ -7,10 +7,12 @@ function Api(props) {
   const [data, setData] = React.useState(null);
   const [data2, setData2] = React.useState(null);
   React.useEffect(() => {
-    fetch("/api")
+    fetch("https://tetrius.hop.sh/api")
       .then((res) => res.json())
       .then((data) => setData(data.message));
-    fetch("/create", { headers: { name: props.name, id: props.id } })
+    fetch("https://tetrius.hop.sh/create", {
+      headers: { name: props.name, id: props.id },
+    })
       .then((res) => res.json())
       .then((data) => setData2(data.message));
   });

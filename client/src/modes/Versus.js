@@ -41,16 +41,12 @@ export default function VersusGame(props) {
 
   useEffect(() => {
     if (name) {
-      fetch("/joingame", {
+      fetch("https://tetrius.hop.sh/joingame", {
         headers: { name: name, id: playerId, channelId: channelId },
       }).then((res) => res.json());
     }
     window.addEventListener("keydown", keyInput);
   }, []);
-
-  useEffect(() => {
-    console.log("rerender");
-  });
 
   function createName(tempName) {
     console.log("createName Called " + tempName);
@@ -61,13 +57,13 @@ export default function VersusGame(props) {
         Math.pow(10, 12) + Math.random() * 9 * Math.pow(10, 12)
       ).toString(36);
     setPlayerId(temp);
-    fetch("/joingame", {
+    fetch("https://tetrius.hop.sh/joingame", {
       headers: { name: tempName, id: temp, channelId: channelId },
     }).then((res) => res.json());
   }
 
   function onclick() {
-    fetch("/ready", {
+    fetch("https://tetrius.hop.sh/ready", {
       headers: { name: name, id: playerId, channelId: channelId },
     }).then((res) => res.json());
   }
@@ -81,7 +77,7 @@ export default function VersusGame(props) {
       stateRef.current.gameStarted ||
       (stateRef.current.playerOneReady && stateRef.current.playerTwoReady)
     ) {
-      fetch("/keypress", {
+      fetch("https://tetrius.hop.sh/keypress", {
         headers: {
           keyCode: keyCode,
           name: nameRef.current,

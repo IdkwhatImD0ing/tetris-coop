@@ -25,7 +25,7 @@ export default function Lobby(props) {
 
   const createCoopChannel = () => {
     setLoading(true);
-    fetch("/createCoopChannel")
+    fetch("https://tetrius.hop.sh/createCoopChannel")
       .then((res) => res.json())
       .then((data) => {
         setLoading(false);
@@ -35,7 +35,7 @@ export default function Lobby(props) {
 
   const createVersusChannel = () => {
     setLoading(true);
-    fetch("/createVersusChannel")
+    fetch("https://tetrius.hop.sh/createVersusChannel")
       .then((res) => res.json())
       .then((data) => {
         setLoading(false);
