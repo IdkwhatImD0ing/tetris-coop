@@ -95,8 +95,7 @@ class VersusGame {
         shapePos: this.state[this.state[this.state.playerTwoId]].shapePos,
         futurePos: -2,
       });
-      this.renderBoard(this.state.playerOneId);
-      this.renderBoard(this.state.playerTwoId);
+      this.renderBoard();
     }, this.state.speed);
   }
 
@@ -359,9 +358,10 @@ class VersusGame {
     this.state[this.state[playerId]] = state;
   };
 
-  renderBoard = (playerId) => {
+  renderBoard = () => {
     hop.channels.patchState(this.channelId, {
-      [this.state[playerId]]: this.state[this.state[playerId]],
+      playerOneState: this.state.playerOneState,
+      playerTwoState: this.state.playerTwoState,
     });
   };
 }

@@ -188,7 +188,7 @@ app.get("/keypress", (req, res) => {
       shapePos: game.state[game.state[id]].shapePos,
       futurePos: -2,
     });
-    game.renderBoard(id);
+    game.renderBoard();
   }
   res.json({ message: "Successfully Pressed Key!", channelId: channelId });
 });
