@@ -3,6 +3,9 @@ import SearchBox from "./searchbox";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
+const url =
+  "https://images.unsplash.com/photo-1465101162946-4377e57745c3?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1756&q=80";
+
 export default function Home(props) {
   const [temp, setTemp] = useState(null);
 
@@ -22,6 +25,9 @@ export default function Home(props) {
         component="section"
         sx={{
           display: "flex",
+          backgroundImage: `url(${url})`,
+          backgroundPosition: "center",
+          backgroundSize: "cover",
           backgroundColor: "Grey",
           flexDirection: "column",
           alignItems: "center",
@@ -35,7 +41,12 @@ export default function Home(props) {
           alignItems="center"
           spacing={5}
         >
-          <Typography variant="h2">Hello There! What is your name?</Typography>
+          <Typography variant="h1" sx={{ color: "white" }}>
+            Tetris Duels
+          </Typography>
+          <Typography variant="h2" sx={{ color: "white" }}>
+            Hello There! What is your name?
+          </Typography>
 
           <SearchBox
             placeholder="Enter your name"

@@ -5,15 +5,23 @@ import {
   Button,
   CircularProgress,
 } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
-import React from "react";
+import { useNavigate } from "react-router-dom";
+import React, { useEffect } from "react";
+
+const url =
+  "https://images.unsplash.com/photo-1591302418462-eb55463b49d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2502&q=80";
 
 export default function Lobby(props) {
   const mode = props.mode;
-  const name = props.name;
+  console.log(mode);
   const navigate = useNavigate();
-  const id = props.playerId;
   const [loading, setLoading] = React.useState(false);
+
+  useEffect(() => {
+    if (mode === 0) {
+      navigate("/coop");
+    }
+  });
 
   const createCoopChannel = () => {
     setLoading(true);
@@ -42,7 +50,9 @@ export default function Lobby(props) {
           component="section"
           sx={{
             display: "flex",
-            backgroundColor: "Grey",
+            backgroundImage: `url(${url})`,
+            backgroundPosition: "center",
+            backgroundSize: "cover",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
@@ -64,6 +74,9 @@ export default function Lobby(props) {
         component="section"
         sx={{
           display: "flex",
+          backgroundImage: `url(${url})`,
+          backgroundPosition: "center",
+          backgroundSize: "cover",
           backgroundColor: "Grey",
           flexDirection: "column",
           alignItems: "center",

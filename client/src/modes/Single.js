@@ -4,6 +4,7 @@ import { COL_SIZE, ROW_SIZE } from "../components/shape";
 import * as s from "../components/shape";
 import Square from "../components/square";
 import debounce from "lodash.debounce";
+import { Box, Stack, Typography } from "@mui/material";
 
 const style = {
   width: "250px",
@@ -13,6 +14,9 @@ const style = {
   borderWidth: "10px",
   gridTemplate: `repeat(${COL_SIZE}, 1fr) / repeat(${ROW_SIZE}, 1fr)`,
 };
+
+const url =
+  "https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1744&q=80";
 
 const LEFT = 37; /* left arrow */
 const ROTATE_UP = 90; /* z */
@@ -302,7 +306,7 @@ class Single extends Component {
         break;
       case ROTATE_UP:
       case ROTATE_DOWN:
-        this.rotateClockwise(keyCode === ROTATE_UP);
+        this.rotateClockwise(keyCode !== ROTATE_UP);
         break;
       case DOWN:
         // this.detectCollision();
@@ -324,10 +328,74 @@ class Single extends Component {
     ));
     return (
       <>
-        <h1> Tetris </h1>
-        <h2> Points: {this.state.score}</h2>
-        <p> Controls: Right | Left | Down | Z | X | Space </p>
-        <div style={style}> {board} </div>
+        <Box
+          component="section"
+          sx={{
+            backgroundImage: `url(${url})`,
+            backgroundPosition: "center",
+            backgroundSize: "cover",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100vh",
+          }}
+        >
+          <Stack
+            direction="row"
+            justifyContent="space-around"
+            alignItems="center"
+            justifyItems="center"
+            spacing={10}
+            sx={{ height: "70vh" }}
+          >
+            <Box
+              width="25vw"
+              height="50vh"
+              sx={{
+                marginTop: 0,
+                display: "flex",
+                backdropFilter: "blur(10px)",
+                boxShadow: "0px 0px 10px #000000",
+                backgroundColor: "rgba(255, 255, 255, 0.275)",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Typography variant="h5"> Points: {this.state.score}</Typography>
+            </Box>
+
+            <div style={style}> {board} </div>
+            <Box
+              width="25vw"
+              height="50vh"
+              sx={{
+                marginTop: 0,
+                display: "flex",
+                backdropFilter: "blur(10px)",
+                boxShadow: "0px 0px 10px #000000",
+                backgroundColor: "rgba(255, 255, 255, 0.275)",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Stack
+                direction="column"
+                justifyContent="space-around"
+                alignItems="center"
+                spacing={2}
+              >
+                <Typography variant="h5">Controls:</Typography>
+                <Typography variant="h5">Right Arrow: Move Right</Typography>
+                <Typography variant="h5">Left Arrow: Move Left</Typography>
+                <Typography variant="h5">Down Arrow: Move Down</Typography>
+                <Typography variant="h5">X: Rotate Clockwise</Typography>
+                <Typography variant="h5">
+                  Z: Rotate Counter Clockwise
+                </Typography>
+                <Typography variant="h5">Space: Drop Block</Typography>
+              </Stack>
+            </Box>
+          </Stack>
+        </Box>
       </>
     );
   }
