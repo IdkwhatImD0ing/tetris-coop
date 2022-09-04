@@ -2,7 +2,7 @@ require("dotenv").config();
 const { Hop, ChannelType } = require("@onehop/js");
 const express = require("express");
 const cors = require("cors");
-const PORT = process.env.PORT || 3001;
+const PORT = 3001;
 const app = express();
 const hop = new Hop(process.env.REACT_APP_HOP_PROJECT_ENV);
 const { VersusGame } = require("./versusgame");
@@ -28,7 +28,6 @@ const createChannelId = () => {
 };
 
 app.use(cors());
-
 app.get("/api", (req, res) => {
   res.json({ message: "Hello from Express!" });
 });
