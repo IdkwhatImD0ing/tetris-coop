@@ -81,8 +81,9 @@ app.get("/createCoopChannel", async (req, res) => {
 });
 
 //Create Versus Channel
-app.get("/createCoopChannel", async (req, res) => {
+app.get("/createVersusChannel", async (req, res) => {
   const channelId = createChannelId();
+  console.log("Creating Versus Channel: " + channelId);
   const channel = await hop.channels.create(
     ChannelType.UNPROTECTED,
     `${channelId}`,
@@ -131,20 +132,30 @@ app.get("/createCoopChannel", async (req, res) => {
 });
 
 app.get("/joingame", (req, res) => {
-  const name = req.get(name);
-  const id = req.get(id);
-  const channelId = req.get(channelId);
-  const game = GAMES.get(channelId);
+  const name = req.get("name");
+  const id = req.get("id");
+  const channelId = req.get("channelId");
+  const game = GAMES.get("channelId");
   if (game) {
     game.joinGame(name, id);
   }
   res.json({ message: "Successfully Joined Game!", channelId: channelId });
 });
 
+app.get("/ready", (req, res) => {
+  const id = req.get("id");
+  const channelId = req.get("channelId");
+  const game = GAMES.get("channelId");
+  if (game) {
+    game.ready(id);
+  }
+  res.json({ message: "Successfully Ready!", channelId: channelId });
+});
+
 app.get("/keypress", (req, res) => {
-  const keyCode = req.get(keyCode);
-  const id = req.get(id);
-  const channelId = req.get(channelId);
+  const keyCode = req.get("keyCode");
+  const id = req.get("id");
+  const channelId = req.get("channelId");
   const game = GAMES.get(channelId);
   if (game) {
     game.updateBoard(id, {
@@ -174,6 +185,7 @@ app.get("/keypress", (req, res) => {
       futurePos: -2,
     });
   }
+  res.json({ message: "Successfully Pressed Key!", channelId: channelId });
 });
 
 app.get("/create", (req, res) => {

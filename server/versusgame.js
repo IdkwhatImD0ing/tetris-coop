@@ -36,6 +36,14 @@ class VersusGame {
     }
   }
 
+  ready(playerId) {
+    if (this.state[this.state[playerId]] === "playerOneState") {
+      this.state.playerOneReady = true;
+    } else if (this.state[this.state[playerId]] === "playerTwoState") {
+      this.state.playerTwoReady = true;
+    }
+  }
+
   startGame() {
     this.started = true;
     this.state.gameStarted = true;
@@ -349,38 +357,6 @@ class VersusGame {
       ...s,
       [this.state[playerId]]: state,
     }));
-  };
-
-  keyInput = (playerId, { keyCode }) => {
-    // clearing the board
-    this.updateBoard(playerId, {
-      shapePos: s.DEFAULT_VALUE,
-      futurePos: s.DEFAULT_VALUE,
-    });
-
-    switch (keyCode) {
-      case LEFT:
-      case RIGHT:
-        this.shiftRight(playerId, keyCode === RIGHT);
-        break;
-      case ROTATE_UP:
-      case ROTATE_DOWN:
-        this.rotateClockwise(playerId, keyCode === ROTATE_UP);
-        break;
-      case DOWN:
-        // this.detectCollision();
-        this.shiftDown();
-        break;
-      case SPACE:
-        state = this.state[this.state[playerId]];
-        state.yPos = state.futureYPos;
-        this.state[this.state[playerId]] = state;
-        break;
-    }
-    this.updateBoard(playerId, {
-      shapePos: this.state.shapePos,
-      futurePos: -2,
-    });
   };
 }
 

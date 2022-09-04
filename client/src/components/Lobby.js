@@ -1,4 +1,10 @@
-import { Box, Stack, Typography, Button } from "@mui/material";
+import {
+  Box,
+  Stack,
+  Typography,
+  Button,
+  CircularProgress,
+} from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import React from "react";
 
@@ -27,6 +33,29 @@ export default function Lobby(props) {
     setLoading(false);
     navigate(`/versus?channelId=${channelId}`);
   };
+
+  if (loading) {
+    return (
+      <>
+        <Box
+          component="section"
+          sx={{
+            display: "flex",
+            backgroundColor: "Grey",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100vh",
+          }}
+        >
+          <Stack direction="column" spacing={4} alignItems="center">
+            <Typography variant="h2">Loading...</Typography>
+            <CircularProgress sx={{ color: "black" }} />
+          </Stack>
+        </Box>
+      </>
+    );
+  }
 
   return (
     <>

@@ -33,8 +33,11 @@ export default function VersusGame(props) {
   useEffect(async () => {
     state = await hop.channels.readState(channelId);
     if (name) {
-      fetch("/joingame").then((res) => res.json());
+      fetch("/joingame", {
+        headers: { name: name, id: playerId, channelId, channelId },
+      }).then((res) => res.json());
     }
+    document.onkeydown = keyInput;
   }, []);
 
   function createID() {
@@ -50,6 +53,18 @@ export default function VersusGame(props) {
     setName(name);
     createID();
   }
+
+  function onclick() {
+    fetch("/ready", {
+      headers: { name: name, id: playerId, channelId, channelId },
+    }).then((res) => res.json());
+  }
+
+  const keyInput = ({ keyCode }) => {
+    fetch("/keypress", {
+      headers: { keyCode: keyCode, id: playerId, channelId: channelId },
+    }).then((res) => res.json());
+  };
 
   return (
     <>
@@ -82,20 +97,40 @@ export default function VersusGame(props) {
               <Typography variant="h2">
                 {state[state.playerOneId].score}!
               </Typography>
+              <Button
+                variant="contained"
+                color={state.playerOneReady ? "green" : "red"}
+                onClick={onclick}
+              >
+                Ready
+              </Button>
             </Stack>
-            <div style={style}> {state[state.playerOneId].board} </div>
-            <div style={style}> {state[state.playerTwoId].board} </div>
-            <Stack
-              drection="column"
-              justifyCOntent="center"
-              alignItems="center"
-              spacing={3}
-            >
-              <Typography variant="h2">{state.playerOneName}!</Typography>
-              <Typography variant="h2">
-                {state[state.playerOneId].score}!
-              </Typography>
-            </Stack>
+            {state.playerOneReady && state.playerTwoReady && (
+              <>
+                <div style={style}> {state[state.playerOneId].board} </div>
+                <div style={style}> {state[state.playerTwoId].board} </div>
+              </>
+            )}
+            {state.playerTwo && (
+              <Stack
+                drection="column"
+                justifyCOntent="center"
+                alignItems="center"
+                spacing={3}
+              >
+                <Typography variant="h2">{state.playerOneName}!</Typography>
+                <Typography variant="h2">
+                  {state[state.playerOneId].score}!
+                </Typography>
+                <Button
+                  variant="contained"
+                  color={state.playerTwoReady ? "green" : "red"}
+                  onClick={onclick}
+                >
+                  Ready
+                </Button>
+              </Stack>
+            )}
           </Stack>
         </Box>
       )}
