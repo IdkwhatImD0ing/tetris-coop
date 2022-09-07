@@ -29,7 +29,9 @@ const createChannelId = () => {
 
 app.use(cors());
 app.get("/api", (req, res) => {
-  res.json({ message: "Hello from Express!" });
+  res.json({
+    message: "Hello from Tetris Duels Backend created in ExpressJS!",
+  });
 });
 
 app.get("/id", async (req, res) => {
@@ -56,6 +58,7 @@ app.get("/createCoopChannel", async (req, res) => {
         playerOneId: "",
         playerTwoId: "",
         gameStarted: false,
+        gameEnded: false,
         board: emptyBoard(),
         speed: 500,
         score: 0,
