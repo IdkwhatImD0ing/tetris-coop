@@ -74,6 +74,8 @@ class VersusGame {
     });
     this.state[this.state[this.state.playerOneId]].shapePos = getRandomShape();
     this.state[this.state[this.state.playerTwoId]].shapePos = getRandomShape();
+    this.futurePosition(playerOneId);
+    this.futurePosition(playerTwoId);
     this.periodicInterval = setInterval(() => {
       this.updateBoard(this.state.playerOneId, {
         shapePos: DEFAULT_VALUE,
