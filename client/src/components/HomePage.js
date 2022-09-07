@@ -1,7 +1,9 @@
 import { Box, Stack, Typography, ThemeProvider } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import SearchBox from "./searchbox";
 import { useState } from "react";
 import { theme } from "./theme";
+import { useReadChannelState } from "@onehop/react";
 
 const url =
   "https://images.unsplash.com/photo-1557264337-e8a93017fe92?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80";
@@ -9,6 +11,7 @@ const url =
 export default function Home(props) {
   const [temp, setTemp] = useState(null);
   const [code, setCode] = useState(null);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     e.preventDefault();
@@ -28,8 +31,17 @@ export default function Home(props) {
 
   const handleCodeSubmit = (e) => {
     e.preventDefault();
-    //console.log(code);
-    props.setCode(code);
+    fetch("https://tetrius.hop.sh/getChannelMode", {
+      headers: { channelId: channelId },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.mode === 0) {
+          navigate(`/coop?channelId=${code}`);
+        } else {
+          navigate(`/versus?channelId=${code}`);
+        }
+      });
   };
 
   return (
@@ -66,15 +78,20 @@ export default function Home(props) {
               handleSubmit={handleSubmit}
               width="400px"
             />
-            <Typography variant="h4" sx={{ color: "white" }}>
-              Already have a code? Enter it here!
-            </Typography>
-            <SearchBox
-              placeholder="Enter Code"
-              handleChange={handleCode}
-              handleSubmit={handleCodeSubmit}
-              width="200px"
-            />
+
+            {props.channelId && (
+              <>
+                <Typography variant="h4" sx={{ color: "white" }}>
+                  Already have a code? Enter it here!
+                </Typography>
+                <SearchBox
+                  placeholder="Enter Code"
+                  handleChange={handleCode}
+                  handleSubmit={handleCodeSubmit}
+                  width="200px"
+                />
+              </>
+            )}
           </Stack>
         </Box>
       </ThemeProvider>

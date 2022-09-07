@@ -52,7 +52,7 @@ export default function VersusGame(props) {
     };
   }, []);
 
-  useEffect(() => {
+  useEffect(() => { 
     const cleanup = async () => {
       fetch("https://tetrius.hop.sh/leaveChannel", {
         headers: { channelId: channelId },
@@ -91,8 +91,10 @@ export default function VersusGame(props) {
       return;
     }
     if (
-      stateRef.current.gameStarted ||
-      (stateRef.current.playerOneReady && stateRef.current.playerTwoReady)
+      (stateRef.current.gameStarted &&
+        !stateRef.current.gameEnded &&
+        stateRef.current.playerOneId === idRef.current) ||
+      stateRef.current.playerTwoId === idRef.current
     ) {
       fetch("https://tetrius.hop.sh/keypress", {
         headers: {
@@ -131,7 +133,7 @@ export default function VersusGame(props) {
   }
 
   if (!name) {
-    return <Home setName={createName} />;
+    return <Home setName={createName} channelId={channelId} />;
   }
 
   return (

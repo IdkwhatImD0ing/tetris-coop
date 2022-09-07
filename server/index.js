@@ -53,8 +53,8 @@ app.get("/leaveChannel", async (req, res) => {
   const stats = await hop.channels.getStats(channelId);
   if (stats.online_count === 1) {
     const room = await hop.channels.delete(channelId);
+    GAMES.delete(channelId);
     res.json({ message: "Successfully Deleted Channel" });
-    return;
   }
   res.json({ message: "Did not delete channel" });
 });
@@ -157,6 +157,16 @@ app.get("/createVersusChannel", async (req, res) => {
   res.json({ message: "Successfully Generated Lobby!", channelId: channelId });
 });
 
+app.get("/getChannelMode", (req, res) => {
+  const channelId = req.get("channelId");
+  const game = GAMES.get(channelId);
+  if (!game) {
+    res.json({ message: "No game found!", mode: -1 });
+  } else {
+    res.json({ message: "Successfully got mode!", mode: game.state.mode });
+  }
+});
+
 app.get("/joingame", (req, res) => {
   const name = req.get("name");
   const id = req.get("id");
@@ -168,7 +178,6 @@ app.get("/joingame", (req, res) => {
     game.state.playerTwoId !== name
   ) {
     res.json({ message: "You are spectator!", channelId: channelId });
-    return;
   }
   if (game) {
     game.joinGame(name, id);
@@ -177,9 +186,7 @@ app.get("/joingame", (req, res) => {
 });
 
 app.get("/ready", (req, res) => {
-  console.log("ready");
   const id = req.get("id");
-  console.log(id);
   const channelId = req.get("channelId");
   const game = GAMES.get(channelId);
   if (
@@ -188,7 +195,6 @@ app.get("/ready", (req, res) => {
     game.state.gameEnded
   ) {
     res.json({ message: "Not allowed!!", channelId: channelId });
-    return;
   }
   if (game) {
     game.ready(id);
@@ -208,7 +214,6 @@ app.get("/keypress", (req, res) => {
     game.state.gameEnded
   ) {
     res.json({ message: "Not Allowed!", channelId: channelId });
-    return;
   }
   if (game) {
     game.updateBoard(id, {
