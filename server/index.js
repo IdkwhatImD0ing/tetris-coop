@@ -164,7 +164,7 @@ app.get("/ready", (req, res) => {
   const game = GAMES.get(channelId);
   if (
     (game.state.playerOneId !== id && game.state.playerTwoId !== id) ||
-    !game.state.gameStarted ||
+    game.state.gameStarted ||
     game.state.gameEnded
   ) {
     res.json({ message: "Not allowed!!", channelId: channelId });
