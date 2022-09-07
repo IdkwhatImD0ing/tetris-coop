@@ -141,6 +141,10 @@ app.get("/joingame", (req, res) => {
   const id = req.get("id");
   const channelId = req.get("channelId");
   const game = GAMES.get(channelId);
+  if (game.state.playerOneId !== name && game.state.playerTwoId !== name) {
+    res.json({ message: "You are spectator!", channelId: channelId });
+    return;
+  }
   if (game) {
     game.joinGame(name, id);
   }
@@ -153,6 +157,10 @@ app.get("/ready", (req, res) => {
   console.log(id);
   const channelId = req.get("channelId");
   const game = GAMES.get(channelId);
+  if (game.state.playerOneId !== name && game.state.playerTwoId !== name) {
+    res.json({ message: "You are spectator!", channelId: channelId });
+    return;
+  }
   if (game) {
     game.ready(id);
   }
@@ -166,6 +174,7 @@ app.get("/keypress", (req, res) => {
   const channelId = req.get("channelId");
   const game = GAMES.get(channelId);
   if (game.state.playerOneName !== name && game.state.playerTwoName !== name) {
+    res.json({ message: "Wrong Player!", channelId: channelId });
     return;
   }
   if (game) {
