@@ -100,6 +100,7 @@ app.get("/createVersusChannel", async (req, res) => {
     playerOneReady: false,
     playerTwoReady: false,
     gameStarted: false,
+    gameEnded: false,
     speed: 500,
     playerOneState: {
       shapePos: -1, // pointers to show which type of shape we are using
@@ -157,8 +158,12 @@ app.get("/ready", (req, res) => {
   console.log(id);
   const channelId = req.get("channelId");
   const game = GAMES.get(channelId);
-  if (game.state.playerOneId !== name && game.state.playerTwoId !== name) {
-    res.json({ message: "You are spectator!", channelId: channelId });
+  if (
+    (game.state.playerOneId !== id && game.state.playerTwoId !== id) ||
+    !game.state.gameStarted ||
+    game.state.gameEnded
+  ) {
+    res.json({ message: "Not allowed!!", channelId: channelId });
     return;
   }
   if (game) {
@@ -173,8 +178,12 @@ app.get("/keypress", (req, res) => {
   const name = req.get("name");
   const channelId = req.get("channelId");
   const game = GAMES.get(channelId);
-  if (game.state.playerOneName !== name && game.state.playerTwoName !== name) {
-    res.json({ message: "Wrong Player!", channelId: channelId });
+  if (
+    (game.state.playerOneId !== id && game.state.playerTwoId !== id) ||
+    !game.state.gameStarted ||
+    game.state.gameEnded
+  ) {
+    res.json({ message: "Not Allowed!", channelId: channelId });
     return;
   }
   if (game) {

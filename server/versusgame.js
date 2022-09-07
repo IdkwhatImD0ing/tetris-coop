@@ -19,7 +19,6 @@ class VersusGame {
   constructor(channelId, state) {
     this.channelId = channelId;
     this.state = state;
-    this.started = false;
   }
 
   joinGame(name, playerId) {
@@ -49,7 +48,7 @@ class VersusGame {
   }
 
   ready(playerId) {
-    if (this.started) {
+    if (this.state.gameStarted && !this.state.gameEnded) {
       return;
     }
     console.log("game ready");
@@ -69,7 +68,6 @@ class VersusGame {
 
   startGame() {
     console.log("gameStarted");
-    this.started = true;
     this.state.gameStarted = true;
     hop.channels.patchState(this.channelId, {
       gameStarted: true,
@@ -101,10 +99,10 @@ class VersusGame {
 
   endGame() {
     console.log("gameeEnded");
-    this.started = false;
-    this.state.gameStarted = false;
+    clearInterval(this.periodicInterval);
+    this.state.gameEnded = true;
     hop.channels.patchState(this.channelId, {
-      gameStarted: false,
+      gameEnded: true,
     });
   }
 
@@ -265,7 +263,6 @@ class VersusGame {
         state.board[bottomValue] >= 0
       ) {
         if (state.yPos <= 0 && state.yPos !== -3) {
-          clearInterval(this.periodicInterval);
           this.endGame();
         } else {
           this.getNextBlock(playerId);

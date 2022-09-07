@@ -172,8 +172,7 @@ export default function VersusGame(props) {
               </Button>
             </Stack>
           </Box>
-          {(state.gameStarted ||
-            (state.playerOneReady && state.playerTwoReady)) && (
+          {state.gameStarted && !state.gameEnded && (
             <Stack
               direction="row"
               spacing={10}
