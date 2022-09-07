@@ -24,7 +24,13 @@ const emptyBoard = () =>
   [...Array(ROW_SIZE * COL_SIZE)].map((_) => DEFAULT_VALUE);
 
 const createChannelId = () => {
-  return Math.random().toString(16);
+  var result = "";
+  var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  var charactersLength = characters.length;
+  for (var i = 0; i < 6; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
 };
 
 app.use(cors());
@@ -37,6 +43,20 @@ app.get("/api", (req, res) => {
 app.get("/id", async (req, res) => {
   const { id } = await hop.channels.tokens.create();
   res.json({ message: "Successfully Generated ID!", id: id });
+});
+
+app.get("/leaveChannel", async (req, res) => {
+  const channelId = req.get("channelId");
+  if (!channelId) {
+    res.json({ message: "Channel ID not provided!" });
+  }
+  const stats = await hop.channels.getStats(channelId);
+  if (stats.online_count === 1) {
+    const room = await hop.channels.delete(channelId);
+    res.json({ message: "Successfully Deleted Channel" });
+    return;
+  }
+  res.json({ message: "Did not delete channel" });
 });
 
 app.get("/createCoopChannel", async (req, res) => {

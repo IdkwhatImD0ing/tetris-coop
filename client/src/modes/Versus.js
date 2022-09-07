@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
+import { hop } from "@onehop/client";
 import {
   Box,
   Stack,
@@ -46,6 +47,22 @@ export default function VersusGame(props) {
       }).then((res) => res.json());
     }
     window.addEventListener("keydown", keyInput);
+    return () => {
+      window.removeEventListener("keydown", keyInput);
+    };
+  }, []);
+
+  useEffect(() => {
+    const cleanup = async () => {
+      fetch("https://tetrius.hop.sh/leaveChannel", {
+        headers: { channelId: channelId },
+      }).then((res) => res.json());
+    };
+
+    window.addEventListener("beforeunload", cleanup);
+    return () => {
+      window.removeEventListener("beforeunload", cleanup);
+    };
   }, []);
 
   function createName(tempName) {
