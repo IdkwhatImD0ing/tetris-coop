@@ -142,7 +142,11 @@ app.get("/joingame", (req, res) => {
   const id = req.get("id");
   const channelId = req.get("channelId");
   const game = GAMES.get(channelId);
-  if (game.state.playerOneId !== name && game.state.playerTwoId !== name) {
+  if (
+    game.state.gameStarted &&
+    game.state.playerOneId !== name &&
+    game.state.playerTwoId !== name
+  ) {
     res.json({ message: "You are spectator!", channelId: channelId });
     return;
   }
