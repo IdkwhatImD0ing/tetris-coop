@@ -32,7 +32,7 @@ export default function Home(props) {
   const handleCodeSubmit = (e) => {
     e.preventDefault();
     fetch("https://tetrius.hop.sh/getChannelMode", {
-      headers: { channelId: channelId },
+      headers: { channelId: e.target.value },
     })
       .then((res) => res.json())
       .then((data) => {
@@ -79,7 +79,7 @@ export default function Home(props) {
               width="400px"
             />
 
-            {props.channelId && (
+            {!props.channelId && (
               <>
                 <Typography variant="h4" sx={{ color: "white" }}>
                   Already have a code? Enter it here!
