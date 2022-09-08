@@ -53,7 +53,8 @@ export default function VersusGame(props) {
   }, []);
 
   useEffect(() => {
-    const cleanup = async () => {
+    const cleanup = (event) => {
+      event.preventDefault();
       fetch("https://tetrius.hop.sh/leaveChannel", {
         headers: { channelId: channelId },
       }).then((res) => res.json());
