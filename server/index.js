@@ -45,16 +45,31 @@ app.get("/id", async (req, res) => {
   res.json({ message: "Successfully Generated ID!", id: id });
 });
 
+app.get("/getChannelMode", (req, res) => {
+  console.log("Getting channel mode");
+  const channelId = req.get("channelId");
+  const game = GAMES.get(channelId);
+  if (!game) {
+    res.json({ message: "No game found!", mode: -1 });
+  } else {
+    res.json({ message: "Successfully got mode!", mode: game.state.mode });
+  }
+});
+
 app.get("/leaveChannel", async (req, res) => {
+  console.log("Leaving channel");
   const channelId = req.get("channelId");
   if (!channelId) {
     res.json({ message: "Channel ID not provided!" });
+    return;
   }
   const stats = await hop.channels.getStats(channelId);
   if (stats.online_count === 1) {
     const room = await hop.channels.delete(channelId);
+    console.log("Deleted channel");
     GAMES.delete(channelId);
     res.json({ message: "Successfully Deleted Channel" });
+    return;
   }
   res.json({ message: "Did not delete channel" });
 });
@@ -155,16 +170,7 @@ app.get("/createVersusChannel", async (req, res) => {
   const g = new VersusGame(channelId, state);
   GAMES.set(channelId, g);
   res.json({ message: "Successfully Generated Lobby!", channelId: channelId });
-});
-
-app.get("/getChannelMode", (req, res) => {
-  const channelId = req.get("channelId");
-  const game = GAMES.get(channelId);
-  if (!game) {
-    res.json({ message: "No game found!", mode: -1 });
-  } else {
-    res.json({ message: "Successfully got mode!", mode: game.state.mode });
-  }
+  return;
 });
 
 app.get("/joingame", (req, res) => {
@@ -178,6 +184,7 @@ app.get("/joingame", (req, res) => {
     game.state.playerTwoId !== name
   ) {
     res.json({ message: "You are spectator!", channelId: channelId });
+    return;
   }
   if (game) {
     game.joinGame(name, id);
@@ -195,6 +202,7 @@ app.get("/ready", (req, res) => {
     game.state.gameEnded
   ) {
     res.json({ message: "Not allowed!!", channelId: channelId });
+    return;
   }
   if (game) {
     game.ready(id);
@@ -214,6 +222,7 @@ app.get("/keypress", (req, res) => {
     game.state.gameEnded
   ) {
     res.json({ message: "Not Allowed!", channelId: channelId });
+    return;
   }
   if (game) {
     game.updateBoard(id, {
