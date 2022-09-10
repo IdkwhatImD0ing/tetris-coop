@@ -57,13 +57,13 @@ app.get("/getChannelMode", (req, res) => {
 });
 
 app.get("/leaveChannel", async (req, res) => {
-  console.log("Leaving channel");
   const channelId = req.get("channelId");
   if (!channelId) {
     res.json({ message: "Channel ID not provided!" });
     return;
   }
   const stats = await hop.channels.getStats(channelId);
+  console.log("Leaving channel, online count: " + stats.online_count);
   if (stats.online_count === 1) {
     const room = await hop.channels.delete(channelId);
     console.log("Deleted channel");

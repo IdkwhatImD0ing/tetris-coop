@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import { hop } from "@onehop/client";
 import {
   Box,
   Stack,
@@ -152,11 +151,58 @@ export default function VersusGame(props) {
       >
         <Stack
           direction="row"
+          justifyContent="center"
+          alignItems="center"
+          justifyItems="center"
+          spacing={5}
+          sx={{ height: "20vh" }}
+        >
+          <Typography variant="h5" sx={{ color: "white" }}>
+            Room Code: {channelId}
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={() => {
+              console.log(channelId);
+              navigator.clipboard.writeText(channelId);
+            }}
+            sx={{
+              backgroundColor: "black",
+              "&:hover": {
+                backgroundColor: "white",
+                color: "black",
+              },
+            }}
+          >
+            Copy Room Code
+          </Button>
+          <Typography variant="h5" sx={{ color: "white" }}>
+            You can also use the link to join:
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={() => {
+              console.log(window.location.href);
+              navigator.clipboard.writeText(window.location.href);
+            }}
+            sx={{
+              backgroundColor: "black",
+              "&:hover": {
+                backgroundColor: "white",
+                color: "black",
+              },
+            }}
+          >
+            Copy Link
+          </Button>
+        </Stack>
+        <Stack
+          direction="row"
           justifyContent="space-around"
           alignItems="center"
           justifyItems="center"
           spacing={10}
-          sx={{ height: "70vh" }}
+          sx={{ height: "20vh" }}
         >
           <Box
             padding="3%"
@@ -186,7 +232,13 @@ export default function VersusGame(props) {
               <Button
                 variant="contained"
                 onClick={onclick}
-                sx={{ backgroundColor: state.playerOneReady ? "green" : "red" }}
+                sx={{
+                  backgroundColor: state.playerOneReady ? "green" : "red",
+                  "&:hover": {
+                    backgroundColor: "white",
+                    color: "black",
+                  },
+                }}
               >
                 Ready
               </Button>
@@ -242,6 +294,10 @@ export default function VersusGame(props) {
                   onClick={onclick}
                   sx={{
                     backgroundColor: state.playerTwoReady ? "green" : "red",
+                    "&:hover": {
+                      backgroundColor: "white",
+                      color: "black",
+                    },
                   }}
                 >
                   Ready
