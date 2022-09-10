@@ -54,8 +54,14 @@ class VersusGame {
     console.log("game ready");
     if (this.state[playerId] === "playerOneState") {
       this.state.playerOneReady = true;
+      hop.channels.patchState(this.channelId, {
+        playerOneReady: this.state.playerOneReady,
+      });
     } else if (this.state[playerId] === "playerTwoState") {
       this.state.playerTwoReady = true;
+      hop.channels.patchState(this.channelId, {
+        playerTwoReady: this.state.playerTwoReady,
+      });
     }
     if (this.state.playerOneReady && this.state.playerTwoReady) {
       this.startGame();
@@ -98,6 +104,9 @@ class VersusGame {
   }
 
   endGame() {
+    if (this.state.gameEnded) {
+      return;
+    }
     console.log("gameeEnded");
     clearInterval(this.periodicInterval);
     this.state.gameEnded = true;
@@ -240,6 +249,9 @@ class VersusGame {
   }, 100);
 
   shiftDown = (playerId) => {
+    if (this.state.gameEnded) {
+      return;
+    }
     let state = this.state[this.state[playerId]];
     let curShape = getShape(state);
     // Checking if bottom of the board is touched
