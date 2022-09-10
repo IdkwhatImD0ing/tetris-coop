@@ -11,6 +11,7 @@ import { useReadChannelState } from "@onehop/react";
 import { COL_SIZE, ROW_SIZE } from "../components/shape";
 import Home from "../components/HomePage";
 import Square from "../components/square";
+import { useBeforeUnload } from "react-beforeunload";
 
 const style = {
   width: "250px",
@@ -24,6 +25,7 @@ const url =
   "https://images.unsplash.com/photo-1592035659284-3b39971c1107?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1726&q=80";
 const loadingUrl =
   "https://images.unsplash.com/photo-1591302418462-eb55463b49d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2502&q=80";
+
 export default function VersusGame(props) {
   const [params] = useSearchParams();
   //console.log(params.get("channelId"));
@@ -31,6 +33,7 @@ export default function VersusGame(props) {
   const [name, setName] = useState(props.name);
   const [playerId, setPlayerId] = useState(props.playerId);
 
+  // Hop State and Refs
   const { state } = useReadChannelState(channelId);
   const stateRef = useRef(state);
   const nameRef = useRef(name);
@@ -51,19 +54,11 @@ export default function VersusGame(props) {
     };
   }, []);
 
-  useEffect(() => {
-    const cleanup = (event) => {
-      event.preventDefault();
-      fetch("https://tetrius.hop.sh/leaveChannel", {
-        headers: { channelId: channelId },
-      }).then((res) => res.json());
-    };
-
-    window.addEventListener("beforeunload", cleanup);
-    return () => {
-      window.removeEventListener("beforeunload", cleanup);
-    };
-  }, []);
+  useBeforeUnload(() => {
+    fetch("https://tetrius.hop.sh/leaveChannel", {
+      headers: { channelId: channelId },
+    }).then((res) => res.json());
+  });
 
   function createName(tempName) {
     console.log("createName Called " + tempName);
