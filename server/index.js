@@ -64,7 +64,7 @@ app.get("/leaveChannel", async (req, res) => {
     return;
   }
   const stats = await hop.channels.getStats(channelId);
-  if (stats.online_count === 0) {
+  if (stats.online_count === 1) {
     const room = await hop.channels.delete(channelId);
     console.log("Deleted channel");
     GAMES.delete(channelId);

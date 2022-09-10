@@ -57,10 +57,6 @@ class VersusGame {
     } else if (this.state[playerId] === "playerTwoState") {
       this.state.playerTwoReady = true;
     }
-    hop.channels.patchState(this.channelId, {
-      playerOneReady: this.state.playerOneReady,
-      playerTwoReady: this.state.playerTwoReady,
-    });
     if (this.state.playerOneReady && this.state.playerTwoReady) {
       this.startGame();
     }
@@ -70,6 +66,8 @@ class VersusGame {
     console.log("gameStarted");
     this.state.gameStarted = true;
     hop.channels.patchState(this.channelId, {
+      playerOneReady: this.state.playerOneReady,
+      playerTwoReady: this.state.playerTwoReady,
       gameStarted: true,
     });
     this.state[this.state[this.state.playerOneId]].shapePos = getRandomShape();
