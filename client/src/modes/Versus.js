@@ -11,7 +11,7 @@ import { useReadChannelState } from "@onehop/react";
 import { COL_SIZE, ROW_SIZE } from "../components/shape";
 import Home from "../components/HomePage";
 import Square from "../components/square";
-import { useBeforeUnload } from "react-beforeunload";
+import { useBeforeunload } from "react-beforeunload";
 
 const style = {
   width: "250px",
@@ -54,7 +54,7 @@ export default function VersusGame(props) {
     };
   }, []);
 
-  useBeforeUnload(() => {
+  useBeforeunload(() => {
     fetch("https://tetrius.hop.sh/leaveChannel", {
       headers: { channelId: channelId },
     }).then((res) => res.json());
