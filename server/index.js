@@ -58,6 +58,7 @@ app.get("/getChannelMode", (req, res) => {
 
 app.get("/leaveChannel", async (req, res) => {
   const channelId = req.get("channelId");
+  console.log("Received channel id: " + channelId);
   if (!channelId) {
     res.json({ message: "Channel ID not provided!" });
     return;

@@ -13,7 +13,6 @@ const url =
 
 export default function Lobby(props) {
   const mode = props.mode;
-  console.log(mode);
   const navigate = useNavigate();
   const [loading, setLoading] = React.useState(false);
 

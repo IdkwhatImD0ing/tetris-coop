@@ -55,6 +55,8 @@ export default function VersusGame(props) {
   }, []);
 
   useBeforeunload(() => {
+    console.log("Before unload");
+    console.log(channelId);
     fetch("https://tetrius.hop.sh/leaveChannel", {
       headers: { channelId: channelId },
     }).then((res) => res.json());
