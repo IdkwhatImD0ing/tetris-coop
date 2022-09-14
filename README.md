@@ -2,7 +2,7 @@
 
 [Website, try it out!](https://tetrisduels.hop.sh/)
 
-[Video Demo](https://youtu.be/oNkD-kUWgVY)
+[Video Demo](https://www.youtube.com/watch?v=y8wPmVJEqlc)
 
 ## Inspiration
 
@@ -47,3 +47,13 @@ I also plan on adding more modes not just limited to the co-op mode. For example
 Furthermore, due to this being the first time I’ve used ExpressJs, the communication between my server and client is simple http requests. In the future, I plan on using websockets to further reduce latency. Moreover, I’ve only touched the tip of the iceberg in regards to Hop’s services. In the future, I plan on fully utilizing Hop’s features such as chat rooms, private channels, custom games, etc.
 
 We hope that this project would be fun for students and the general public.
+
+## To run the program in an IDE
+
+First, ensure you have Node Program Manager installed
+
+Next, run `npm install` to install the modules
+
+Then, run `npm start` to start the app
+
+Finally, navigate to `http://localhost:3000` in a browser to view the local version of the app
