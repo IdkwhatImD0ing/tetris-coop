@@ -50,7 +50,7 @@ We hope that this project would be fun for students and the general public.
 
 ## To run the program in an IDE
 
-First, ensure you have Node Program Manager installed
+First, ensure you have Node Program Manager installed and navigate to root/client
 
 Next, run `npm install` to install the modules
 
