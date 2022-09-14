@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 import {
   Box,
@@ -28,10 +29,13 @@ const loadingUrl =
 
 export default function VersusGame(props) {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
   //console.log(params.get("channelId"));
   const channelId = params.get("channelId");
   const [name, setName] = useState(props.name);
   const [playerId, setPlayerId] = useState(props.playerId);
+  const [loading, setLoading] = useState(true);
+  const [gameNotFound, setGameNotFound] = useState(false);
 
   // Hop State and Refs
   const { state } = useReadChannelState(channelId);
@@ -46,7 +50,14 @@ export default function VersusGame(props) {
     if (name) {
       fetch("https://tetrius.hop.sh/joingame", {
         headers: { name: name, id: playerId, channelId: channelId },
-      }).then((res) => res.json());
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setLoading(false);
+          if (data.response < 0) {
+            setGameNotFound(true);
+          }
+        });
     }
     window.addEventListener("keydown", keyInput);
     return () => {
@@ -103,7 +114,11 @@ export default function VersusGame(props) {
     }
   };
 
-  if (!state) {
+  if (!name) {
+    return <Home setName={createName} channelId={channelId} />;
+  }
+
+  if (loading) {
     return (
       <>
         <Box
@@ -128,8 +143,38 @@ export default function VersusGame(props) {
     );
   }
 
-  if (!name) {
-    return <Home setName={createName} channelId={channelId} />;
+  if (gameNotFound) {
+    return (
+      <>
+        <Box
+          component="section"
+          sx={{
+            display: "flex",
+            backgroundImage: `url(${loadingUrl})`,
+            backgroundPosition: "center",
+            backgroundSize: "cover",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100vh",
+          }}
+        >
+          <Stack direction="column" spacing={4} alignItems="center">
+            <Typography variant="h3">Lobby not Found</Typography>
+            <Button
+              onClick={() => {
+                navigate("/select");
+              }}
+            >
+              {" "}
+              <Typography variant="h4" sx={{ color: "white" }}>
+                Go Home
+              </Typography>
+            </Button>
+          </Stack>
+        </Box>
+      </>
+    );
   }
 
   return (

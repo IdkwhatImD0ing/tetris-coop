@@ -177,18 +177,22 @@ app.get("/joingame", (req, res) => {
   const id = req.get("id");
   const channelId = req.get("channelId");
   const game = GAMES.get(channelId);
+  if (!game) {
+    res.json({ message: "Game not found!", response: -1 });
+    return;
+  }
   if (
     game.state.gameStarted &&
     game.state.playerOneId !== name &&
     game.state.playerTwoId !== name
   ) {
-    res.json({ message: "You are spectator!", channelId: channelId });
+    res.json({ message: "You are spectator!", response: 1 });
     return;
   }
   if (game) {
     game.joinGame(name, id);
   }
-  res.json({ message: "Successfully Joined Game!", channelId: channelId });
+  res.json({ message: "Successfully Joined Game!", response: 1 });
 });
 
 app.get("/ready", (req, res) => {
