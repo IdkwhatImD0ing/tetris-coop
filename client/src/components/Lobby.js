@@ -83,6 +83,9 @@ export default function Lobby(props) {
           height: "100vh",
         }}
       >
+        <Typography variant="h2" sx={{ color: "Black", mb: 5 }}>
+          Create Game Lobby
+        </Typography>
         <Button
           variant="contained"
           onClick={() => {
@@ -95,7 +98,7 @@ export default function Lobby(props) {
           }}
           sx={{ color: "white", backgroundColor: "black" }}
         >
-          Create Room
+          Create
         </Button>
       </Box>
     </>

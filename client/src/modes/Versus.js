@@ -83,7 +83,18 @@ export default function VersusGame(props) {
     setPlayerId(temp);
     fetch("https://tetrius.hop.sh/joingame", {
       headers: { name: tempName, id: temp, channelId: channelId },
-    }).then((res) => res.json());
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data.response);
+        if (data.response < 0) {
+          console.log("Game Not Found");
+          setGameNotFound(true);
+          setLoading(false);
+        } else {
+          setLoading(false);
+        }
+      });
   }
 
   function onclick() {
@@ -167,7 +178,7 @@ export default function VersusGame(props) {
               }}
             >
               {" "}
-              <Typography variant="h4" sx={{ color: "white" }}>
+              <Typography variant="h4" sx={{ color: "black" }}>
                 Go Home
               </Typography>
             </Button>

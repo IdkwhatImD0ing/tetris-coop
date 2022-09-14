@@ -58,7 +58,7 @@ app.get("/getChannelMode", (req, res) => {
 
 app.get("/leaveChannel", async (req, res) => {
   const channelId = req.get("channelId");
-  if (!channelId) {
+  if (!channelId || !GAMES.get(channelId)) {
     res.json({ message: "Channel ID not provided!" });
     return;
   }
